@@ -64,9 +64,17 @@ class Instancia:
     
     def agregar_arista(self, nodo1: int, nodo2: int, capacidad: float):
         self.aristas.append(Arista(nodo1, nodo2, capacidad))
+        self.num_aristas += 1
     
     def agregar_nuevo_nodo(self, x: float, y: float, diametro: float):
         self.nuevos_nodos.append(NuevoNodo(x, y, diametro))
+    
+    def agregar_nodo_expansion(self, x: float, y: float, 
+                               es_fuente: bool = False) -> int:
+        nuevo_id = max(self.nodos.keys(), default=0) + 1
+        self.agregar_nodo(nuevo_id, x, y, es_fuente)
+        self.num_nodos += 1
+        return nuevo_id
     
     def obtener_fuentes(self) -> List[Nodo]:
         return [nodo for nodo in self.nodos.values() if nodo.es_fuente]
@@ -94,7 +102,6 @@ def leer_instancia(ruta_archivo: str) -> Instancia:
     
     primera_linea = lineas[i].strip().split()
     instancia.num_nodos = int(primera_linea[0])
-    instancia.num_aristas = int(primera_linea[1])
     i += 1
     
     while i < len(lineas):
@@ -148,6 +155,7 @@ def leer_instancia(ruta_archivo: str) -> Instancia:
         
         i += 1
     
+    instancia.num_aristas = len(instancia.aristas)
     return instancia
 
 
@@ -172,6 +180,24 @@ def cargar_todas_las_instancias(directorio: str = "instancias") -> Dict[str, Ins
     return instancias
 
 
+def copiar_instancia(instancia: Instancia) -> Instancia:
+    copia = Instancia(instancia.nombre)
+    copia.num_nodos = instancia.num_nodos
+    copia.num_aristas = instancia.num_aristas
+    copia.office_id = instancia.office_id
+    
+    for nodo_id, nodo in instancia.nodos.items():
+        copia.nodos[nodo_id] = Nodo(nodo.id, nodo.x, nodo.y, nodo.es_fuente)
+    
+    for arista in instancia.aristas:
+        copia.aristas.append(Arista(arista.nodo1, arista.nodo2, 
+                                   arista.capacidad))
+        copia.aristas[-1].longitud = arista.longitud
+    
+    for nuevo in instancia.nuevos_nodos:
+        copia.nuevos_nodos.append(NuevoNodo(nuevo.x, nuevo.y, nuevo.diametro))
+    
+    return copia
 
 
 '''
@@ -184,19 +210,38 @@ Salidas: un listado de aristas, agregando la longitud a sus atributos preexisten
 
 '''
 
+def distancia_euclidiana(x1: float, y1: float, x2: float, y2: float) -> float:
+    dx = x2 - x1
+    dy = y2 - y1
+    return math.sqrt(dx * dx + dy * dy)
+
+
 def calcular_longitud_arista(instancia: Instancia, 
                              arista: Arista) -> float:
     nodo1 = instancia.nodos[arista.nodo1]
     nodo2 = instancia.nodos[arista.nodo2]
-    dx = nodo2.x - nodo1.x
-    dy = nodo2.y - nodo1.y
-    return math.sqrt(dx * dx + dy * dy)
+    return distancia_euclidiana(nodo1.x, nodo1.y, nodo2.x, nodo2.y)
 
 
 def calcular_longitudes_tuberias(instancia: Instancia) -> None:
     for arista in instancia.aristas:
         if arista.longitud is None:
             arista.longitud = calcular_longitud_arista(instancia, arista)
+
+
+def encontrar_nodo_cercano(instancia: Instancia, x: float, 
+                           y: float) -> Tuple[int, float]:
+    nodo_cercano_id = None
+    distancia_min = float('inf')
+    
+    for nodo_id, nodo in instancia.nodos.items():
+        if not nodo.es_fuente:
+            dist = distancia_euclidiana(x, y, nodo.x, nodo.y)
+            if dist < distancia_min:
+                distancia_min = dist
+                nodo_cercano_id = nodo_id
+    
+    return nodo_cercano_id, distancia_min
 
 
 def obtener_ruta_grafica(instancia: Instancia, tipo: str, 
@@ -549,6 +594,8 @@ def calcular_frescura_agua(instancia: Instancia) -> Dict:
             }
     
     return resultados
+
+
 
 
 def graficar_frescura_agua(instancia: Instancia, ruta_salida: str = None) -> None:
