@@ -1,3 +1,8 @@
+import os
+import math
+from typing import List, Dict, Set, Tuple
+import matplotlib.pyplot as plt
+from collections import defaultdict, deque
 '''
 1. Instancias
 
@@ -17,8 +22,8 @@ y un tercer numero que representa su capacidad (diámetro).
 Por cada uno se indican sus coordenadas x,y, y el diámetro de la tubería que se usaría para conectarlo. Ninguno de los nodos nuevos es una fuente. 
 '''
 
-import os
-from typing import List, Dict
+
+
 
 
 class Nodo:
@@ -179,6 +184,104 @@ Salidas: un listado de aristas, agregando la longitud a sus atributos preexisten
 
 '''
 
+def calcular_longitud_arista(instancia: Instancia, 
+                             arista: Arista) -> float:
+    nodo1 = instancia.nodos[arista.nodo1]
+    nodo2 = instancia.nodos[arista.nodo2]
+    dx = nodo2.x - nodo1.x
+    dy = nodo2.y - nodo1.y
+    return math.sqrt(dx * dx + dy * dy)
+
+
+def calcular_longitudes_tuberias(instancia: Instancia) -> None:
+    for arista in instancia.aristas:
+        if arista.longitud is None:
+            arista.longitud = calcular_longitud_arista(instancia, arista)
+
+
+def obtener_ruta_grafica(instancia: Instancia, tipo: str, 
+                        directorio: str = "resultados") -> str:
+    os.makedirs(directorio, exist_ok=True)
+    return os.path.join(directorio, f"{instancia.nombre}_{tipo}.png")
+
+
+def graficar_red(instancia: Instancia, ruta_salida: str = None,
+                 mostrar_etiquetas: bool = True) -> None:
+    fig, ax = plt.subplots(figsize=(14, 12))
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    max_capacidad = max(a.capacidad for a in instancia.aristas)
+    min_capacidad = min(a.capacidad for a in instancia.aristas)
+    
+    for arista in instancia.aristas:
+        nodo1 = instancia.nodos[arista.nodo1]
+        nodo2 = instancia.nodos[arista.nodo2]
+        
+        capacidad_norm = arista.capacidad / max_capacidad
+        color = plt.cm.viridis(capacidad_norm)
+        grosor = 1 + capacidad_norm * 3
+        
+        ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y], 
+                color=color, linewidth=grosor, alpha=0.7, zorder=1)
+        
+        if mostrar_etiquetas:
+            mid_x = (nodo1.x + nodo2.x) / 2
+            mid_y = (nodo1.y + nodo2.y) / 2
+            etiqueta = f"L:{arista.longitud:.1f}\nC:{arista.capacidad:.1f}"
+            ax.text(mid_x, mid_y, etiqueta, fontsize=6, ha='center', va='center',
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8),
+                    zorder=3)
+    
+    fuentes_dibujadas = False
+    for id_nodo, nodo in instancia.nodos.items():
+        if nodo.es_fuente:
+            label = 'Fuente' if not fuentes_dibujadas else ''
+            ax.scatter(nodo.x, nodo.y, c='red', s=250, marker='s',
+                      edgecolors='black', linewidths=2, zorder=4,
+                      label=label)
+            fuentes_dibujadas = True
+        else:
+            ax.scatter(nodo.x, nodo.y, c='blue', s=120, marker='o',
+                      edgecolors='black', linewidths=1.5, zorder=4)
+        
+        ax.text(nodo.x, nodo.y, str(id_nodo), fontsize=9,
+                ha='center', va='center', color='white',
+                weight='bold', zorder=5)
+    
+    if instancia.office_id in instancia.nodos:
+        office = instancia.nodos[instancia.office_id]
+        ax.scatter(office.x, office.y, c='green', s=300, marker='*',
+                  edgecolors='black', linewidths=2, zorder=6, label='Oficina')
+    
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.viridis, 
+                               norm=plt.Normalize(vmin=min_capacidad, 
+                                                 vmax=max_capacidad))
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=ax, fraction=0.03, pad=0.02, shrink=0.6)
+    cbar.set_label('Capacidad', fontsize=9, weight='bold')
+    cbar.ax.tick_params(labelsize=8)
+    
+    ax.set_xlabel('Coordenada X', fontsize=12)
+    ax.set_ylabel('Coordenada Y', fontsize=12)
+    titulo = (f'Red de Distribución de Agua - {instancia.nombre}\n'
+              f'Nodos: {len(instancia.nodos)}, '
+              f'Aristas: {len(instancia.aristas)} | '
+              f'Longitudes calculadas')
+    ax.set_title(titulo, fontsize=14, weight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='upper right', fontsize=10)
+    ax.set_aspect('equal', adjustable='box')
+    
+    plt.tight_layout()
+    
+    if ruta_salida is None:
+        ruta_salida = obtener_ruta_grafica(instancia, "red")
+    
+    plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
+    print(f"Gráfica guardada en: {ruta_salida}")
+    plt.close()
+
 
 
 '''
@@ -195,6 +298,202 @@ tuberías cerradas, estilo libre)
 Salidas: lista cuales nodos pertenecen al mismo sector y cuales tuberías quedan cerradas. 
 '''
 
+def construir_grafo(instancia: Instancia) -> Dict[int, List[int]]:
+    grafo = defaultdict(list)
+    for arista in instancia.aristas:
+        grafo[arista.nodo1].append(arista.nodo2)
+        grafo[arista.nodo2].append(arista.nodo1)
+    return grafo
+
+
+def distancia_en_red(instancia: Instancia, grafo: Dict[int, List[int]],
+                    nodo_inicio: int, nodo_fin: int) -> float:
+    if nodo_inicio == nodo_fin:
+        return 0.0
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    distancias = {nodo_inicio: 0.0}
+    cola = deque([nodo_inicio])
+    
+    while cola:
+        actual = cola.popleft()
+        
+        for vecino in grafo.get(actual, []):
+            if vecino not in distancias:
+                arista = next((a for a in instancia.aristas 
+                              if (a.nodo1 == actual and a.nodo2 == vecino) or
+                                 (a.nodo1 == vecino and a.nodo2 == actual)), None)
+                if arista and arista.longitud:
+                    nueva_dist = distancias[actual] + arista.longitud
+                    distancias[vecino] = nueva_dist
+                    if vecino == nodo_fin:
+                        return nueva_dist
+                    cola.append(vecino)
+    
+    return float('inf')
+
+
+def camino_en_red(instancia: Instancia, grafo: Dict[int, List[int]],
+                 nodo_inicio: int, nodo_fin: int) -> Tuple[List[int], float]:
+    if nodo_inicio == nodo_fin:
+        return [nodo_inicio], 0.0
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    distancias = {nodo_inicio: 0.0}
+    predecesores = {nodo_inicio: None}
+    cola = deque([nodo_inicio])
+    
+    while cola:
+        actual = cola.popleft()
+        
+        for vecino in grafo.get(actual, []):
+            if vecino not in distancias:
+                arista = next((a for a in instancia.aristas 
+                              if (a.nodo1 == actual and a.nodo2 == vecino) or
+                                 (a.nodo1 == vecino and a.nodo2 == actual)), None)
+                if arista and arista.longitud:
+                    nueva_dist = distancias[actual] + arista.longitud
+                    distancias[vecino] = nueva_dist
+                    predecesores[vecino] = actual
+                    if vecino == nodo_fin:
+                        camino = []
+                        nodo = nodo_fin
+                        while nodo is not None:
+                            camino.append(nodo)
+                            nodo = predecesores[nodo]
+                        return list(reversed(camino)), nueva_dist
+                    cola.append(vecino)
+    
+    return [], float('inf')
+
+
+def sectorizar_red(instancia: Instancia) -> Tuple[Dict[int, int], Set[Tuple[int, int]]]:
+    calcular_longitudes_tuberias(instancia)
+    fuentes = instancia.obtener_fuentes()
+    grafo = construir_grafo(instancia)
+    
+    if not fuentes:
+        return {}, set()
+    
+    asignacion_sector = {}
+    for id_nodo, nodo in instancia.nodos.items():
+        if nodo.es_fuente:
+            asignacion_sector[id_nodo] = id_nodo
+        else:
+            min_dist = float('inf')
+            fuente_asignada = None
+            for fuente in fuentes:
+                dist = distancia_en_red(instancia, grafo, id_nodo, fuente.id)
+                if dist < min_dist:
+                    min_dist = dist
+                    fuente_asignada = fuente.id
+            asignacion_sector[id_nodo] = fuente_asignada
+    
+    aristas_cerradas = set()
+    for arista in instancia.aristas:
+        sector1 = asignacion_sector[arista.nodo1]
+        sector2 = asignacion_sector[arista.nodo2]
+        if sector1 != sector2:
+            aristas_cerradas.add((min(arista.nodo1, arista.nodo2),
+                                 max(arista.nodo1, arista.nodo2)))
+    
+    return asignacion_sector, aristas_cerradas
+
+
+def graficar_sectorizacion(instancia: Instancia, ruta_salida: str = None) -> None:
+    asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+    fuentes = instancia.obtener_fuentes()
+    
+    fig, ax = plt.subplots(figsize=(14, 12))
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    colores_sectores = ['#1f77b4', '#d62728', '#ff7f0e', '#2ca02c', 
+                       '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    
+    fuente_a_color = {}
+    for i, fuente in enumerate(fuentes):
+        fuente_a_color[fuente.id] = colores_sectores[i % len(colores_sectores)]
+    
+    for arista in instancia.aristas:
+        par = (min(arista.nodo1, arista.nodo2),
+               max(arista.nodo1, arista.nodo2))
+        if par not in aristas_cerradas:
+            nodo1 = instancia.nodos[arista.nodo1]
+            nodo2 = instancia.nodos[arista.nodo2]
+            sector = asignacion_sector[arista.nodo1]
+            color = fuente_a_color.get(sector, 'gray')
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                   color=color, linewidth=2, alpha=0.6, zorder=1)
+    
+    for nodo1_id, nodo2_id in aristas_cerradas:
+        nodo1 = instancia.nodos[nodo1_id]
+        nodo2 = instancia.nodos[nodo2_id]
+        ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+               color='black', linewidth=2, linestyle='--',
+               alpha=0.4, zorder=1)
+    
+    for id_nodo, nodo in instancia.nodos.items():
+        sector = asignacion_sector.get(id_nodo)
+        color = fuente_a_color.get(sector, 'gray')
+        
+        if nodo.es_fuente:
+            ax.scatter(nodo.x, nodo.y, c=color, s=400, marker='o',
+                      edgecolors='black', linewidths=3, zorder=5)
+        else:
+            ax.scatter(nodo.x, nodo.y, c=color, s=150, marker='o',
+                      edgecolors='black', linewidths=1.5, zorder=4)
+        
+        ax.text(nodo.x, nodo.y, str(id_nodo), fontsize=8,
+                ha='center', va='center', color='white',
+                weight='bold', zorder=6)
+    
+    if instancia.office_id in instancia.nodos:
+        office = instancia.nodos[instancia.office_id]
+        ax.scatter(office.x, office.y, c='yellow', s=350, marker='*',
+                  edgecolors='black', linewidths=2, zorder=7, label='Oficina')
+    
+    ax.set_xlabel('Coordenada X', fontsize=12)
+    ax.set_ylabel('Coordenada Y', fontsize=12)
+    titulo = (f'Sectorización de la Red - {instancia.nombre}\n'
+              f'Sectores: {len(fuentes)}, '
+              f'Tuberías cerradas: {len(aristas_cerradas)}')
+    ax.set_title(titulo, fontsize=14, weight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='upper right', fontsize=10)
+    ax.set_aspect('equal', adjustable='box')
+    
+    plt.tight_layout()
+    
+    if ruta_salida is None:
+        ruta_salida = obtener_ruta_grafica(instancia, "sectorizacion")
+    
+    plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
+    print(f"Gráfica de sectorización guardada en: {ruta_salida}")
+    plt.close()
+
+
+def reportar_sectorizacion(instancia: Instancia) -> Dict:
+    asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+    fuentes = instancia.obtener_fuentes()
+    
+    sectores = defaultdict(list)
+    for id_nodo, fuente_id in asignacion_sector.items():
+        sectores[fuente_id].append(id_nodo)
+    
+    tuberias_cerradas = []
+    for nodo1_id, nodo2_id in aristas_cerradas:
+        tuberias_cerradas.append((nodo1_id, nodo2_id))
+    
+    return {
+        'sectores': dict(sectores),
+        'tuberias_cerradas': tuberias_cerradas,
+        'num_sectores': len(fuentes),
+        'num_tuberias_cerradas': len(aristas_cerradas)
+    }
+
 
 
 '''
@@ -205,6 +504,157 @@ Esto es proporcional a la distancia de la fuente al nodo.
 
 Salidas: Por cada sector, su fuente, nodo mas lejano y la longitud de esa distancia. 
 '''
+
+def construir_grafo_sector(instancia: Instancia, 
+                          aristas_cerradas: Set[Tuple[int, int]]) -> Dict[int, List[int]]:
+    grafo = defaultdict(list)
+    for arista in instancia.aristas:
+        par = (min(arista.nodo1, arista.nodo2),
+               max(arista.nodo1, arista.nodo2))
+        if par not in aristas_cerradas:
+            grafo[arista.nodo1].append(arista.nodo2)
+            grafo[arista.nodo2].append(arista.nodo1)
+    return grafo
+
+
+def calcular_frescura_agua(instancia: Instancia) -> Dict:
+    asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+    grafo = construir_grafo_sector(instancia, aristas_cerradas)
+    fuentes = instancia.obtener_fuentes()
+    
+    resultados = {}
+    
+    for fuente in fuentes:
+        sector_nodos = [id_nodo for id_nodo, fuente_id 
+                       in asignacion_sector.items() 
+                       if fuente_id == fuente.id]
+        
+        max_dist = 0.0
+        nodo_mas_lejano = None
+        
+        for nodo_id in sector_nodos:
+            if nodo_id != fuente.id:
+                dist = distancia_en_red(instancia, grafo, fuente.id, nodo_id)
+                if dist > max_dist and dist != float('inf'):
+                    max_dist = dist
+                    nodo_mas_lejano = nodo_id
+        
+        if nodo_mas_lejano:
+            camino, _ = camino_en_red(instancia, grafo, fuente.id, nodo_mas_lejano)
+            resultados[fuente.id] = {
+                'fuente': fuente.id,
+                'nodo_mas_lejano': nodo_mas_lejano,
+                'distancia': max_dist,
+                'camino': camino
+            }
+    
+    return resultados
+
+
+def graficar_frescura_agua(instancia: Instancia, ruta_salida: str = None) -> None:
+    asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+    frescura = calcular_frescura_agua(instancia)
+    fuentes = instancia.obtener_fuentes()
+    
+    fig, ax = plt.subplots(figsize=(14, 12))
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    colores_sectores = ['#1f77b4', '#d62728', '#ff7f0e', '#2ca02c', 
+                       '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    
+    fuente_a_color = {}
+    for i, fuente in enumerate(fuentes):
+        fuente_a_color[fuente.id] = colores_sectores[i % len(colores_sectores)]
+    
+    for arista in instancia.aristas:
+        par = (min(arista.nodo1, arista.nodo2),
+               max(arista.nodo1, arista.nodo2))
+        if par not in aristas_cerradas:
+            nodo1 = instancia.nodos[arista.nodo1]
+            nodo2 = instancia.nodos[arista.nodo2]
+            sector = asignacion_sector[arista.nodo1]
+            color = fuente_a_color.get(sector, 'gray')
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                   color=color, linewidth=1.5, alpha=0.4, zorder=1)
+    
+    for nodo1_id, nodo2_id in aristas_cerradas:
+        nodo1 = instancia.nodos[nodo1_id]
+        nodo2 = instancia.nodos[nodo2_id]
+        ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+               color='black', linewidth=1, linestyle='--',
+               alpha=0.2, zorder=1)
+    
+    for fuente_id, info in frescura.items():
+        camino = info['camino']
+        color = fuente_a_color.get(fuente_id, 'gray')
+        distancia_total = info['distancia']
+        
+        for i in range(len(camino) - 1):
+            nodo1 = instancia.nodos[camino[i]]
+            nodo2 = instancia.nodos[camino[i + 1]]
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                   color=color, linewidth=4, alpha=0.8, zorder=2)
+        
+        if camino:
+            nodo_fin = instancia.nodos[camino[-1]]
+            ax.text(nodo_fin.x, nodo_fin.y + 100, 
+                   f"Dist: {distancia_total:.1f}",
+                   fontsize=10, ha='center', va='bottom',
+                   bbox=dict(boxstyle='round,pad=0.5', 
+                            facecolor=color, alpha=0.8,
+                            edgecolor='black', linewidth=2),
+                   weight='bold', zorder=8)
+    
+    for id_nodo, nodo in instancia.nodos.items():
+        sector = asignacion_sector.get(id_nodo)
+        color = fuente_a_color.get(sector, 'gray')
+        
+        es_fuente = nodo.es_fuente
+        es_mas_lejano = any(info['nodo_mas_lejano'] == id_nodo 
+                           for info in frescura.values())
+        
+        if es_fuente:
+            ax.scatter(nodo.x, nodo.y, c=color, s=500, marker='o',
+                      edgecolors='black', linewidths=3, zorder=5)
+        elif es_mas_lejano:
+            ax.scatter(nodo.x, nodo.y, c=color, s=400, marker='s',
+                      edgecolors='black', linewidths=3, zorder=5)
+        else:
+            ax.scatter(nodo.x, nodo.y, c=color, s=120, marker='o',
+                      edgecolors='black', linewidths=1.5, zorder=4)
+        
+        ax.text(nodo.x, nodo.y, str(id_nodo), fontsize=8,
+                ha='center', va='center', color='white',
+                weight='bold', zorder=6)
+    
+    if instancia.office_id in instancia.nodos:
+        office = instancia.nodos[instancia.office_id]
+        ax.scatter(office.x, office.y, c='yellow', s=350, marker='*',
+                  edgecolors='black', linewidths=2, zorder=7, label='Oficina')
+    
+    ax.set_xlabel('Coordenada X', fontsize=12)
+    ax.set_ylabel('Coordenada Y', fontsize=12)
+    
+    info_frescura = '\n'.join([f"Fuente {info['fuente']} -> Nodo {info['nodo_mas_lejano']}: "
+                              f"{info['distancia']:.1f} (distancia total)" 
+                              for info in frescura.values()])
+    
+    titulo = (f'Frescura de Agua - {instancia.nombre}\n'
+              f'{info_frescura}')
+    ax.set_title(titulo, fontsize=14, weight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='upper right', fontsize=10)
+    ax.set_aspect('equal', adjustable='box')
+    
+    plt.tight_layout()
+    
+    if ruta_salida is None:
+        ruta_salida = obtener_ruta_grafica(instancia, "frescura")
+    
+    plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
+    print(f"Gráfica de frescura guardada en: {ruta_salida}")
+    plt.close()
 
 
 '''
@@ -260,3 +710,86 @@ Guarda las imágenes en archivos jpg o png.
 
 
 '''
+
+#TODO: Completar las funciones para guardar los resultados en un archivo de texto
+#Esto es por que nos pide en la linea 699
+def guardar_resultados(instancia: Instancia, sufijo: str = "antes",
+                      directorio: str = "resultados") -> None:
+    os.makedirs(directorio, exist_ok=True)
+    ruta_archivo = os.path.join(directorio, f"{instancia.nombre}_{sufijo}.txt")
+    
+    with open(ruta_archivo, 'w', encoding='utf-8') as f:
+        f.write(f"Resultados para la instancia {instancia.nombre}\n")
+        f.write(f"Estado: {sufijo} de agregar nodos nuevos\n\n")
+        
+        f.write("1. Información básica\n")
+        f.write(f"La red tiene {instancia.num_nodos} nodos y {instancia.num_aristas} aristas.\n")
+        f.write(f"La oficina se encuentra en el nodo {instancia.office_id}.\n")
+        f.write(f"Hay {len(instancia.nuevos_nodos)} nuevos nodos pendientes de agregar.\n")
+        
+        fuentes = instancia.obtener_fuentes()
+        f.write(f"\nSe encontraron {len(fuentes)} fuentes:\n")
+        for fuente in fuentes:
+            f.write(f"  Nodo {fuente.id} en ({fuente.x:.2f}, {fuente.y:.2f})\n")
+        
+        f.write("\n\n")
+        
+        f.write("2. Longitud de las tuberías\n")
+        calcular_longitudes_tuberias(instancia)
+        
+        longitudes = [a.longitud for a in instancia.aristas 
+                     if a.longitud is not None]
+        if longitudes:
+            total = sum(longitudes)
+            promedio = total / len(longitudes)
+            f.write(f"La red tiene una longitud total de {total:.2f} unidades.\n")
+            f.write(f"Longitud promedio: {promedio:.2f}, mínima: {min(longitudes):.2f}, máxima: {max(longitudes):.2f}\n\n")
+            
+            f.write("Detalle de aristas:\n")
+            for arista in instancia.aristas:
+                f.write(f"  {arista.nodo1} -> {arista.nodo2}: "
+                       f"{arista.longitud:.2f} unidades, "
+                       f"capacidad {arista.capacidad:.1f}\n")
+        
+        f.write("\n\n")
+        
+        f.write("3. Sectorización\n")
+        asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+        reporte = reportar_sectorizacion(instancia)
+        
+        f.write(f"La red se dividió en {reporte['num_sectores']} sectores.\n")
+        f.write(f"Se cerraron {reporte['num_tuberias_cerradas']} tuberías entre sectores.\n\n")
+        
+        f.write("Distribución de nodos por sector:\n")
+        for fuente_id, nodos in reporte['sectores'].items():
+            nodos_str = ', '.join(map(str, sorted(nodos)))
+            f.write(f"  Sector {fuente_id} (fuente {fuente_id}): {len(nodos)} nodos - {nodos_str}\n")
+        
+        if reporte['tuberias_cerradas']:
+            f.write("\nTuberías cerradas:\n")
+            for nodo1, nodo2 in reporte['tuberias_cerradas']:
+                f.write(f"  {nodo1} - {nodo2}\n")
+        
+        f.write("\n\n")
+        
+        f.write("4. Frescura de agua\n")
+        frescura = calcular_frescura_agua(instancia)
+        
+        for fuente_id, info in frescura.items():
+            camino_str = ' -> '.join(map(str, info['camino']))
+            f.write(f"\nSector de la fuente {fuente_id}:\n")
+            f.write(f"  El nodo más lejano es el {info['nodo_mas_lejano']} a {info['distancia']:.2f} unidades.\n")
+            f.write(f"  Camino: {camino_str}\n")
+        
+        f.write("\n\n")
+        
+        f.write("5. Flujo máximo de cada sector\n")
+        f.write("(Pendiente de implementación)\n\n")
+        
+        f.write("6. Muestra de calidad de agua\n")
+        f.write("(Pendiente de implementación)\n\n")
+        
+        f.write("7. Expansión de la red\n")
+        f.write("(Pendiente de implementación)\n")
+    
+    print(f"Resultados guardados en: {ruta_archivo}")
