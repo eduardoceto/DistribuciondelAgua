@@ -17,6 +17,154 @@ y un tercer numero que representa su capacidad (diámetro).
 Por cada uno se indican sus coordenadas x,y, y el diámetro de la tubería que se usaría para conectarlo. Ninguno de los nodos nuevos es una fuente. 
 '''
 
+import os
+from typing import List, Dict
+
+
+class Nodo:
+    def __init__(self, id_nodo: int, x: float, y: float, es_fuente: bool):
+        self.id = id_nodo
+        self.x = x
+        self.y = y
+        self.es_fuente = es_fuente
+
+
+class Arista:
+    def __init__(self, nodo1: int, nodo2: int, capacidad: float):
+        self.nodo1 = nodo1
+        self.nodo2 = nodo2
+        self.capacidad = capacidad
+        self.longitud = None
+
+
+class NuevoNodo:
+    def __init__(self, x: float, y: float, diametro: float):
+        self.x = x
+        self.y = y
+        self.diametro = diametro
+
+
+class Instancia:
+    def __init__(self, nombre: str):
+        self.nombre = nombre
+        self.num_nodos = 0
+        self.num_aristas = 0
+        self.nodos: Dict[int, Nodo] = {}
+        self.aristas: List[Arista] = []
+        self.office_id = None
+        self.nuevos_nodos: List[NuevoNodo] = []
+    
+    def agregar_nodo(self, id_nodo: int, x: float, y: float, es_fuente: bool):
+        self.nodos[id_nodo] = Nodo(id_nodo, x, y, es_fuente)
+    
+    def agregar_arista(self, nodo1: int, nodo2: int, capacidad: float):
+        self.aristas.append(Arista(nodo1, nodo2, capacidad))
+    
+    def agregar_nuevo_nodo(self, x: float, y: float, diametro: float):
+        self.nuevos_nodos.append(NuevoNodo(x, y, diametro))
+    
+    def obtener_fuentes(self) -> List[Nodo]:
+        return [nodo for nodo in self.nodos.values() if nodo.es_fuente]
+
+
+def leer_instancia(ruta_archivo: str) -> Instancia:
+    """
+    Lee y parsea un archivo de instancia.
+    
+    Args:
+        ruta_archivo: Ruta al archivo .txt de la instancia
+        
+    Returns:
+        Instancia: Objeto Instancia con todos los datos parseados
+    """
+    # Obtener el nombre de la instancia desde el nombre del archivo
+    nombre = os.path.splitext(os.path.basename(ruta_archivo))[0]
+    instancia = Instancia(nombre)
+    
+    with open(ruta_archivo, 'r') as f:
+        lineas = f.readlines()
+    
+    seccion_actual = None
+    i = 0
+    
+    primera_linea = lineas[i].strip().split()
+    instancia.num_nodos = int(primera_linea[0])
+    instancia.num_aristas = int(primera_linea[1])
+    i += 1
+    
+    while i < len(lineas):
+        linea = lineas[i].strip()
+        
+        if not linea:
+            i += 1
+            continue
+        
+        if linea == "[NODES]":
+            seccion_actual = "NODES"
+            i += 1
+            continue
+        elif linea == "[EDGES]":
+            seccion_actual = "EDGES"
+            i += 1
+            continue
+        elif linea == "[OFFICE]":
+            seccion_actual = "OFFICE"
+            i += 1
+            continue
+        elif linea == "[NEW]":
+            seccion_actual = "NEW"
+            i += 1
+            continue
+        
+        if seccion_actual == "NODES":
+            partes = linea.split()
+            id_nodo = int(partes[0])
+            x = float(partes[1])
+            y = float(partes[2])
+            es_fuente = int(partes[3]) == 1
+            instancia.agregar_nodo(id_nodo, x, y, es_fuente)
+        
+        elif seccion_actual == "EDGES":
+            partes = linea.split()
+            nodo1 = int(partes[0])
+            nodo2 = int(partes[1])
+            capacidad = float(partes[2])
+            instancia.agregar_arista(nodo1, nodo2, capacidad)
+        
+        elif seccion_actual == "OFFICE":
+            instancia.office_id = int(linea)
+        
+        elif seccion_actual == "NEW":
+            partes = linea.split()
+            x = float(partes[0])
+            y = float(partes[1])
+            diametro = float(partes[2])
+            instancia.agregar_nuevo_nodo(x, y, diametro)
+        
+        i += 1
+    
+    return instancia
+
+
+def cargar_todas_las_instancias(directorio: str = "instancias") -> Dict[str, Instancia]:
+    """
+    Carga todas las instancias desde un directorio.
+    
+    Args:
+        directorio: Directorio que contiene los archivos .txt de instancias
+        
+    Returns:
+        Dict[str, Instancia]: Diccionario con nombre de instancia como clave
+    """
+    instancias = {}
+    archivos = [f for f in os.listdir(directorio) if f.endswith('.txt')]
+    
+    for archivo in archivos:
+        ruta_completa = os.path.join(directorio, archivo)
+        instancia = leer_instancia(ruta_completa)
+        instancias[instancia.nombre] = instancia
+    
+    return instancias
 
 
 
