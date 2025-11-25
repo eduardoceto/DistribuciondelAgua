@@ -1,0 +1,88 @@
+Resultados para la instancia HAN
+Estado: antes de agregar nodos nuevos
+
+1. Información básica
+La red tiene 32 nodos y 34 aristas.
+La oficina se encuentra en el nodo 29.
+Hay 3 nuevos nodos pendientes de agregar.
+
+Se encontraron 2 fuentes:
+  Nodo 13 en (5636.76, 6676.24)
+  Nodo 1 en (5360.71, 1354.05)
+
+
+2. Longitud de las tuberías
+La red tiene una longitud total de 33827.38 unidades.
+Longitud promedio: 994.92, mínima: 399.55, máxima: 1780.86
+
+Detalle de aristas:
+  1 -> 2: 409.03 unidades, capacidad 16.0
+  2 -> 3: 1003.26 unidades, capacidad 16.0
+  3 -> 4: 849.02 unidades, capacidad 16.0
+  4 -> 5: 998.89 unidades, capacidad 18.0
+  5 -> 6: 1230.40 unidades, capacidad 18.0
+  6 -> 7: 649.25 unidades, capacidad 16.0
+  7 -> 8: 944.62 unidades, capacidad 18.0
+  8 -> 9: 954.50 unidades, capacidad 18.0
+  9 -> 10: 788.02 unidades, capacidad 18.0
+  10 -> 11: 697.87 unidades, capacidad 16.0
+  11 -> 12: 839.54 unidades, capacidad 16.0
+  12 -> 13: 1683.19 unidades, capacidad 16.0
+  10 -> 14: 788.01 unidades, capacidad 18.0
+  14 -> 15: 854.61 unidades, capacidad 18.0
+  15 -> 16: 654.82 unidades, capacidad 18.0
+  17 -> 16: 721.42 unidades, capacidad 16.0
+  18 -> 17: 543.84 unidades, capacidad 16.0
+  19 -> 18: 677.03 unidades, capacidad 16.0
+  3 -> 19: 606.08 unidades, capacidad 18.0
+  3 -> 20: 1437.33 unidades, capacidad 16.0
+  20 -> 21: 1287.46 unidades, capacidad 16.0
+  21 -> 22: 399.55 unidades, capacidad 16.0
+  20 -> 23: 1609.32 unidades, capacidad 16.0
+  23 -> 24: 1496.05 unidades, capacidad 18.0
+  24 -> 25: 1053.29 unidades, capacidad 16.0
+  26 -> 25: 1097.00 unidades, capacidad 16.0
+  27 -> 26: 856.07 unidades, capacidad 18.0
+  16 -> 27: 1087.68 unidades, capacidad 16.0
+  23 -> 28: 1132.51 unidades, capacidad 18.0
+  28 -> 29: 1398.45 unidades, capacidad 18.0
+  29 -> 30: 1780.86 unidades, capacidad 18.0
+  30 -> 31: 768.58 unidades, capacidad 18.0
+  32 -> 31: 1085.81 unidades, capacidad 16.0
+  25 -> 32: 1444.01 unidades, capacidad 18.0
+
+
+3. Sectorización
+La red se dividió en 2 sectores.
+Se cerraron 4 tuberías entre sectores.
+
+Distribución de nodos por sector:
+  Sector 13 (fuente 13): 10 nodos - 8, 9, 10, 11, 12, 13, 14, 15, 26, 27
+  Sector 1 (fuente 1): 22 nodos - 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32
+
+Tuberías cerradas:
+  25 - 26
+  15 - 16
+  16 - 27
+  7 - 8
+
+
+4. Frescura de agua
+
+Sector de la fuente 13:
+  El nodo más lejano es el 8 a 4963.12 unidades.
+  Camino: 13 -> 12 -> 11 -> 10 -> 9 -> 8
+
+Sector de la fuente 1:
+  El nodo más lejano es el 31 a 9538.11 unidades.
+  Camino: 1 -> 2 -> 3 -> 20 -> 23 -> 24 -> 25 -> 32 -> 31
+
+
+5. Flujo máximo de cada sector
+(Pendiente de implementación)
+
+6. Muestra de calidad de agua
+(Pendiente de implementación)
+
+7. Expansión de la red
+(Pendiente de implementación)

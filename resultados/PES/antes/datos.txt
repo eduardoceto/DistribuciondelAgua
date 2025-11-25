@@ -1,0 +1,151 @@
+Resultados para la instancia PES
+Estado: antes de agregar nodos nuevos
+
+1. Información básica
+La red tiene 71 nodos y 99 aristas.
+La oficina se encuentra en el nodo 51.
+Hay 2 nuevos nodos pendientes de agregar.
+
+Se encontraron 2 fuentes:
+  Nodo 1 en (656582.88, 963296.25)
+  Nodo 7 en (661252.19, 960607.19)
+
+
+2. Longitud de las tuberías
+La red tiene una longitud total de 42908.87 unidades.
+Longitud promedio: 433.42, mínima: 3.57, máxima: 1605.88
+
+Detalle de aristas:
+  1 -> 2: 741.69 unidades, capacidad 101.0
+  3 -> 4: 442.94 unidades, capacidad 153.0
+  3 -> 5: 1123.65 unidades, capacidad 101.0
+  3 -> 1: 269.63 unidades, capacidad 126.0
+  6 -> 7: 107.53 unidades, capacidad 101.0
+  6 -> 8: 203.07 unidades, capacidad 101.0
+  9 -> 6: 1605.88 unidades, capacidad 101.0
+  10 -> 11: 841.26 unidades, capacidad 151.0
+  15 -> 14: 44.03 unidades, capacidad 353.0
+  13 -> 17: 583.89 unidades, capacidad 201.0
+  18 -> 13: 618.50 unidades, capacidad 203.0
+  18 -> 19: 334.90 unidades, capacidad 203.0
+  20 -> 18: 341.67 unidades, capacidad 101.0
+  21 -> 20: 426.94 unidades, capacidad 103.0
+  22 -> 23: 237.28 unidades, capacidad 101.0
+  24 -> 25: 918.87 unidades, capacidad 203.0
+  14 -> 24: 161.69 unidades, capacidad 351.0
+  24 -> 17: 200.06 unidades, capacidad 303.0
+  26 -> 17: 3.57 unidades, capacidad 201.0
+  26 -> 27: 284.76 unidades, capacidad 203.0
+  21 -> 22: 678.42 unidades, capacidad 103.0
+  23 -> 21: 639.69 unidades, capacidad 101.0
+  27 -> 23: 422.94 unidades, capacidad 103.0
+  20 -> 27: 843.26 unidades, capacidad 126.0
+  19 -> 20: 459.30 unidades, capacidad 101.0
+  28 -> 29: 178.90 unidades, capacidad 153.0
+  28 -> 30: 445.63 unidades, capacidad 101.0
+  30 -> 28: 445.63 unidades, capacidad 101.0
+  31 -> 32: 244.53 unidades, capacidad 103.0
+  30 -> 33: 328.69 unidades, capacidad 103.0
+  34 -> 30: 689.05 unidades, capacidad 101.0
+  35 -> 36: 1047.34 unidades, capacidad 101.0
+  31 -> 11: 1484.37 unidades, capacidad 103.0
+  37 -> 31: 122.68 unidades, capacidad 128.0
+  37 -> 38: 120.80 unidades, capacidad 203.0
+  19 -> 38: 55.31 unidades, capacidad 201.0
+  40 -> 39: 344.58 unidades, capacidad 103.0
+  40 -> 41: 72.74 unidades, capacidad 103.0
+  9 -> 40: 553.55 unidades, capacidad 101.0
+  33 -> 9: 301.49 unidades, capacidad 101.0
+  41 -> 33: 568.26 unidades, capacidad 103.0
+  34 -> 41: 63.82 unidades, capacidad 101.0
+  39 -> 34: 310.72 unidades, capacidad 103.0
+  12 -> 39: 1124.50 unidades, capacidad 203.0
+  25 -> 12: 365.48 unidades, capacidad 151.0
+  35 -> 25: 997.72 unidades, capacidad 101.0
+  29 -> 35: 33.29 unidades, capacidad 101.0
+  8 -> 29: 717.85 unidades, capacidad 201.0
+  42 -> 11: 434.43 unidades, capacidad 253.0
+  43 -> 42: 317.96 unidades, capacidad 401.0
+  44 -> 42: 228.71 unidades, capacidad 353.0
+  45 -> 46: 405.39 unidades, capacidad 101.0
+  47 -> 48: 230.10 unidades, capacidad 253.0
+  32 -> 49: 4.20 unidades, capacidad 103.0
+  46 -> 32: 66.22 unidades, capacidad 103.0
+  50 -> 46: 172.80 unidades, capacidad 103.0
+  49 -> 50: 154.69 unidades, capacidad 103.0
+  48 -> 49: 645.03 unidades, capacidad 101.0
+  51 -> 48: 155.95 unidades, capacidad 201.0
+  50 -> 51: 642.61 unidades, capacidad 103.0
+  52 -> 50: 206.67 unidades, capacidad 103.0
+  51 -> 53: 156.73 unidades, capacidad 153.0
+  54 -> 55: 147.69 unidades, capacidad 101.0
+  56 -> 47: 52.38 unidades, capacidad 253.0
+  44 -> 57: 344.41 unidades, capacidad 303.0
+  56 -> 44: 592.15 unidades, capacidad 103.0
+  57 -> 56: 365.01 unidades, capacidad 201.0
+  58 -> 57: 899.62 unidades, capacidad 251.0
+  59 -> 60: 145.63 unidades, capacidad 126.0
+  55 -> 61: 1110.81 unidades, capacidad 103.0
+  52 -> 53: 631.63 unidades, capacidad 101.0
+  45 -> 52: 336.99 unidades, capacidad 103.0
+  61 -> 5: 193.48 unidades, capacidad 126.0
+  60 -> 61: 186.76 unidades, capacidad 103.0
+  58 -> 60: 231.29 unidades, capacidad 101.0
+  62 -> 58: 173.12 unidades, capacidad 251.0
+  62 -> 2: 740.87 unidades, capacidad 103.0
+  59 -> 62: 86.39 unidades, capacidad 203.0
+  4 -> 59: 732.86 unidades, capacidad 203.0
+  2 -> 4: 192.83 unidades, capacidad 103.0
+  65 -> 6: 1232.66 unidades, capacidad 103.0
+  65 -> 76: 141.25 unidades, capacidad 251.0
+  86 -> 45: 1312.71 unidades, capacidad 103.0
+  76 -> 8: 977.46 unidades, capacidad 251.0
+  82 -> 83: 5.00 unidades, capacidad 101.0
+  82 -> 85: 240.01 unidades, capacidad 103.0
+  22 -> 85: 695.38 unidades, capacidad 101.0
+  26 -> 83: 645.08 unidades, capacidad 101.0
+  5 -> 86: 1476.21 unidades, capacidad 103.0
+  54 -> 84: 215.98 unidades, capacidad 101.0
+  83 -> 85: 239.98 unidades, capacidad 101.0
+  43 -> 87: 10.00 unidades, capacidad 153.0
+  55 -> 89: 179.57 unidades, capacidad 101.0
+  89 -> 53: 331.38 unidades, capacidad 101.0
+  55 -> 88: 237.70 unidades, capacidad 101.0
+  88 -> 51: 325.84 unidades, capacidad 101.0
+  84 -> 88: 113.37 unidades, capacidad 101.0
+  88 -> 89: 150.82 unidades, capacidad 103.0
+  55 -> 86: 240.74 unidades, capacidad 103.0
+
+
+3. Sectorización
+La red se dividió en 2 sectores.
+Se cerraron 2 tuberías entre sectores.
+
+Distribución de nodos por sector:
+  Sector 1 (fuente 1): 38 nodos - 1, 2, 3, 4, 5, 10, 11, 19, 31, 32, 37, 38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 84, 86, 87, 88, 89
+  Sector 7 (fuente 7): 33 nodos - 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 33, 34, 35, 36, 39, 40, 41, 65, 76, 82, 83, 85
+
+Tuberías cerradas:
+  19 - 20
+  18 - 19
+
+
+4. Frescura de agua
+
+Sector de la fuente 1:
+  El nodo más lejano es el 19 a 5197.12 unidades.
+  Camino: 1 -> 3 -> 5 -> 86 -> 45 -> 46 -> 32 -> 31 -> 37 -> 38 -> 19
+
+Sector de la fuente 7:
+  El nodo más lejano es el 21 a 5149.38 unidades.
+  Camino: 7 -> 6 -> 8 -> 29 -> 35 -> 25 -> 24 -> 17 -> 13 -> 18 -> 20 -> 21
+
+
+5. Flujo máximo de cada sector
+(Pendiente de implementación)
+
+6. Muestra de calidad de agua
+(Pendiente de implementación)
+
+7. Expansión de la red
+(Pendiente de implementación)

@@ -1,0 +1,74 @@
+Resultados para la instancia NYT
+Estado: antes de agregar nodos nuevos
+
+1. Información básica
+La red tiene 20 nodos y 21 aristas.
+La oficina se encuentra en el nodo 5.
+Hay 3 nuevos nodos pendientes de agregar.
+
+Se encontraron 2 fuentes:
+  Nodo 17 en (317.00, 505.00)
+  Nodo 19 en (1419.00, 1594.00)
+
+
+2. Longitud de las tuberías
+La red tiene una longitud total de 6020.25 unidades.
+Longitud promedio: 286.68, mínima: 182.21, máxima: 480.84
+
+Detalle de aristas:
+  1 -> 2: 261.20 unidades, capacidad 181.0
+  2 -> 3: 230.23 unidades, capacidad 183.0
+  3 -> 4: 248.65 unidades, capacidad 183.0
+  4 -> 5: 207.04 unidades, capacidad 181.0
+  5 -> 6: 211.61 unidades, capacidad 181.0
+  6 -> 7: 187.38 unidades, capacidad 181.0
+  7 -> 8: 187.95 unidades, capacidad 133.0
+  8 -> 9: 185.42 unidades, capacidad 133.0
+  9 -> 10: 182.21 unidades, capacidad 183.0
+  11 -> 9: 275.14 unidades, capacidad 205.0
+  12 -> 11: 236.54 unidades, capacidad 207.0
+  13 -> 12: 213.41 unidades, capacidad 205.0
+  14 -> 13: 351.43 unidades, capacidad 205.0
+  15 -> 14: 281.11 unidades, capacidad 205.0
+  1 -> 15: 322.33 unidades, capacidad 207.0
+  10 -> 17: 473.07 unidades, capacidad 73.0
+  12 -> 18: 362.02 unidades, capacidad 75.0
+  18 -> 19: 309.65 unidades, capacidad 61.0
+  11 -> 20: 386.59 unidades, capacidad 63.0
+  20 -> 16: 426.41 unidades, capacidad 63.0
+  9 -> 16: 480.84 unidades, capacidad 75.0
+
+
+3. Sectorización
+La red se dividió en 2 sectores.
+Se cerraron 3 tuberías entre sectores.
+
+Distribución de nodos por sector:
+  Sector 17 (fuente 17): 11 nodos - 3, 4, 5, 6, 7, 8, 9, 10, 16, 17, 20
+  Sector 19 (fuente 19): 9 nodos - 1, 2, 11, 12, 13, 14, 15, 18, 19
+
+Tuberías cerradas:
+  2 - 3
+  9 - 11
+  11 - 20
+
+
+4. Frescura de agua
+
+Sector de la fuente 17:
+  El nodo más lejano es el 3 a 1883.33 unidades.
+  Camino: 17 -> 10 -> 9 -> 8 -> 7 -> 6 -> 5 -> 4 -> 3
+
+Sector de la fuente 19:
+  El nodo más lejano es el 2 a 2101.17 unidades.
+  Camino: 19 -> 18 -> 12 -> 13 -> 14 -> 15 -> 1 -> 2
+
+
+5. Flujo máximo de cada sector
+(Pendiente de implementación)
+
+6. Muestra de calidad de agua
+(Pendiente de implementación)
+
+7. Expansión de la red
+(Pendiente de implementación)

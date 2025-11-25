@@ -244,14 +244,22 @@ def encontrar_nodo_cercano(instancia: Instancia, x: float,
     return nodo_cercano_id, distancia_min
 
 
-def obtener_ruta_grafica(instancia: Instancia, tipo: str, 
-                        directorio: str = "resultados") -> str:
+def obtener_ruta_resultados(instancia: Instancia, etapa: str = "antes",
+                            directorio_base: str = "resultados") -> str:
+    directorio = os.path.join(directorio_base, instancia.nombre, etapa)
     os.makedirs(directorio, exist_ok=True)
-    return os.path.join(directorio, f"{instancia.nombre}_{tipo}.png")
+    return directorio
+
+
+def obtener_ruta_grafica(instancia: Instancia, tipo: str, 
+                        etapa: str = "antes",
+                        directorio_base: str = "resultados") -> str:
+    directorio = obtener_ruta_resultados(instancia, etapa, directorio_base)
+    return os.path.join(directorio, f"{tipo}.png")
 
 
 def graficar_red(instancia: Instancia, ruta_salida: str = None,
-                 mostrar_etiquetas: bool = True) -> None:
+                 mostrar_etiquetas: bool = True, etapa: str = "antes") -> None:
     fig, ax = plt.subplots(figsize=(14, 12))
     
     calcular_longitudes_tuberias(instancia)
@@ -321,7 +329,7 @@ def graficar_red(instancia: Instancia, ruta_salida: str = None,
     plt.tight_layout()
     
     if ruta_salida is None:
-        ruta_salida = obtener_ruta_grafica(instancia, "red")
+        ruta_salida = obtener_ruta_grafica(instancia, "red", etapa)
     
     plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
     print(f"Gráfica guardada en: {ruta_salida}")
@@ -422,32 +430,49 @@ def sectorizar_red(instancia: Instancia) -> Tuple[Dict[int, int], Set[Tuple[int,
     if not fuentes:
         return {}, set()
     
+    distancias = {}
+    cola = deque()
+    
+    for fuente in fuentes:
+        distancias[fuente.id] = (0.0, fuente.id)
+        cola.append((fuente.id, fuente.id))
+    
+    while cola:
+        nodo_actual, fuente_origen = cola.popleft()
+        dist_actual, _ = distancias[nodo_actual]
+        
+        for vecino in grafo.get(nodo_actual, []):
+            arista = next((a for a in instancia.aristas 
+                          if (a.nodo1 == nodo_actual and a.nodo2 == vecino) or
+                             (a.nodo1 == vecino and a.nodo2 == nodo_actual)), None)
+            
+            if arista and arista.longitud:
+                nueva_dist = dist_actual + arista.longitud
+                
+                if vecino not in distancias or nueva_dist < distancias[vecino][0]:
+                    distancias[vecino] = (nueva_dist, fuente_origen)
+                    cola.append((vecino, fuente_origen))
+    
     asignacion_sector = {}
-    for id_nodo, nodo in instancia.nodos.items():
-        if nodo.es_fuente:
-            asignacion_sector[id_nodo] = id_nodo
-        else:
-            min_dist = float('inf')
-            fuente_asignada = None
-            for fuente in fuentes:
-                dist = distancia_en_red(instancia, grafo, id_nodo, fuente.id)
-                if dist < min_dist:
-                    min_dist = dist
-                    fuente_asignada = fuente.id
-            asignacion_sector[id_nodo] = fuente_asignada
+    for nodo_id, (_, fuente_id) in distancias.items():
+        asignacion_sector[nodo_id] = fuente_id
+    
+    for fuente in fuentes:
+        asignacion_sector[fuente.id] = fuente.id
     
     aristas_cerradas = set()
     for arista in instancia.aristas:
-        sector1 = asignacion_sector[arista.nodo1]
-        sector2 = asignacion_sector[arista.nodo2]
-        if sector1 != sector2:
+        sector1 = asignacion_sector.get(arista.nodo1)
+        sector2 = asignacion_sector.get(arista.nodo2)
+        if sector1 and sector2 and sector1 != sector2:
             aristas_cerradas.add((min(arista.nodo1, arista.nodo2),
                                  max(arista.nodo1, arista.nodo2)))
     
     return asignacion_sector, aristas_cerradas
 
 
-def graficar_sectorizacion(instancia: Instancia, ruta_salida: str = None) -> None:
+def graficar_sectorizacion(instancia: Instancia, ruta_salida: str = None, 
+                          etapa: str = "antes") -> None:
     asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
     fuentes = instancia.obtener_fuentes()
     
@@ -513,7 +538,7 @@ def graficar_sectorizacion(instancia: Instancia, ruta_salida: str = None) -> Non
     plt.tight_layout()
     
     if ruta_salida is None:
-        ruta_salida = obtener_ruta_grafica(instancia, "sectorizacion")
+        ruta_salida = obtener_ruta_grafica(instancia, "sectorizacion", etapa)
     
     plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
     print(f"Gráfica de sectorización guardada en: {ruta_salida}")
@@ -566,26 +591,46 @@ def calcular_frescura_agua(instancia: Instancia) -> Dict:
     asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
     grafo = construir_grafo_sector(instancia, aristas_cerradas)
     fuentes = instancia.obtener_fuentes()
+    calcular_longitudes_tuberias(instancia)
     
     resultados = {}
     
     for fuente in fuentes:
-        sector_nodos = [id_nodo for id_nodo, fuente_id 
-                       in asignacion_sector.items() 
-                       if fuente_id == fuente.id]
+        distancias = {fuente.id: 0.0}
+        predecesores = {fuente.id: None}
+        cola = deque([fuente.id])
+        
+        while cola:
+            actual = cola.popleft()
+            for vecino in grafo.get(actual, []):
+                if vecino not in distancias:
+                    arista = next(
+                        (a for a in instancia.aristas
+                         if (a.nodo1 == actual and a.nodo2 == vecino) or
+                            (a.nodo1 == vecino and a.nodo2 == actual)), None)
+                    if arista and arista.longitud:
+                        distancias[vecino] = distancias[actual] + arista.longitud
+                        predecesores[vecino] = actual
+                        cola.append(vecino)
+        
+        sector_nodos = [nid for nid, fid in asignacion_sector.items()
+                        if fid == fuente.id and nid != fuente.id]
         
         max_dist = 0.0
         nodo_mas_lejano = None
-        
         for nodo_id in sector_nodos:
-            if nodo_id != fuente.id:
-                dist = distancia_en_red(instancia, grafo, fuente.id, nodo_id)
-                if dist > max_dist and dist != float('inf'):
-                    max_dist = dist
-                    nodo_mas_lejano = nodo_id
+            if nodo_id in distancias and distancias[nodo_id] > max_dist:
+                max_dist = distancias[nodo_id]
+                nodo_mas_lejano = nodo_id
         
         if nodo_mas_lejano:
-            camino, _ = camino_en_red(instancia, grafo, fuente.id, nodo_mas_lejano)
+            camino = []
+            nodo = nodo_mas_lejano
+            while nodo is not None:
+                camino.append(nodo)
+                nodo = predecesores.get(nodo)
+            camino.reverse()
+            
             resultados[fuente.id] = {
                 'fuente': fuente.id,
                 'nodo_mas_lejano': nodo_mas_lejano,
@@ -598,7 +643,8 @@ def calcular_frescura_agua(instancia: Instancia) -> Dict:
 
 
 
-def graficar_frescura_agua(instancia: Instancia, ruta_salida: str = None) -> None:
+def graficar_frescura_agua(instancia: Instancia, ruta_salida: str = None,
+                          etapa: str = "antes") -> None:
     asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
     frescura = calcular_frescura_agua(instancia)
     fuentes = instancia.obtener_fuentes()
@@ -697,7 +743,7 @@ def graficar_frescura_agua(instancia: Instancia, ruta_salida: str = None) -> Non
     plt.tight_layout()
     
     if ruta_salida is None:
-        ruta_salida = obtener_ruta_grafica(instancia, "frescura")
+        ruta_salida = obtener_ruta_grafica(instancia, "frescura", etapa)
     
     plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
     print(f"Gráfica de frescura guardada en: {ruta_salida}")
@@ -760,14 +806,14 @@ Guarda las imágenes en archivos jpg o png.
 
 #TODO: Completar las funciones para guardar los resultados en un archivo de texto
 #Esto es por que nos pide en la linea 699
-def guardar_resultados(instancia: Instancia, sufijo: str = "antes",
-                      directorio: str = "resultados") -> None:
-    os.makedirs(directorio, exist_ok=True)
-    ruta_archivo = os.path.join(directorio, f"{instancia.nombre}_{sufijo}.txt")
+def guardar_resultados(instancia: Instancia, etapa: str = "antes",
+                      directorio_base: str = "resultados") -> None:
+    directorio = obtener_ruta_resultados(instancia, etapa, directorio_base)
+    ruta_archivo = os.path.join(directorio, "datos.txt")
     
     with open(ruta_archivo, 'w', encoding='utf-8') as f:
         f.write(f"Resultados para la instancia {instancia.nombre}\n")
-        f.write(f"Estado: {sufijo} de agregar nodos nuevos\n\n")
+        f.write(f"Estado: {etapa} de agregar nodos nuevos\n\n")
         
         f.write("1. Información básica\n")
         f.write(f"La red tiene {instancia.num_nodos} nodos y {instancia.num_aristas} aristas.\n")
@@ -840,3 +886,28 @@ def guardar_resultados(instancia: Instancia, sufijo: str = "antes",
         f.write("(Pendiente de implementación)\n")
     
     print(f"Resultados guardados en: {ruta_archivo}")
+
+
+def procesar_instancia(instancia: Instancia, etapa: str = "antes") -> None:
+    graficar_red(instancia, etapa=etapa)
+    graficar_sectorizacion(instancia, etapa=etapa)
+    graficar_frescura_agua(instancia, etapa=etapa)
+    guardar_resultados(instancia, etapa=etapa)
+    
+    #TODO: Implementar lo demas
+
+
+if __name__ == "__main__":
+    instancias = cargar_todas_las_instancias("instancias")
+    
+    print(f"\nSe encontraron {len(instancias)} instancias: {', '.join(instancias.keys())}\n")
+    
+    for nombre, instancia in instancias.items():
+        print(f"Procesando instancia: {nombre}")
+        procesar_instancia(instancia, etapa="antes")
+        
+        # TODO: Implementar expansión de red (punto 7)
+        # instancia_expandida = copiar_instancia(instancia)
+        # expandir_red(instancia_expandida)
+        # procesar_instancia(instancia_expandida, etapa="despues")
+    
