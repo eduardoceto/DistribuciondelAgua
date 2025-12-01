@@ -170,7 +170,45 @@ Sector de la fuente 37:
 
 
 6. Muestra de calidad de agua
-(Pendiente de implementación)
+Ruta de muestreo iniciando y terminando en la oficina (nodo 4):
+  4 -> 5: 1432.86 unidades
+  5 -> 13: 528.72 unidades
+  13 -> 20: 1023.58 unidades
+  20 -> 14: 261.58 unidades
+  14 -> 21: 440.06 unidades
+  21 -> 6: 1426.62 unidades
+  6 -> 7: 926.37 unidades
+  7 -> 24: 1363.56 unidades
+  24 -> 8: 899.16 unidades
+  8 -> 28: 983.08 unidades
+  28 -> 29: 996.04 unidades
+  29 -> 30: 385.07 unidades
+  30 -> 9: 841.50 unidades
+  9 -> 36: 1253.32 unidades
+  36 -> 35: 566.47 unidades
+  35 -> 33: 1361.76 unidades
+  33 -> 34: 240.62 unidades
+  34 -> 31: 413.68 unidades
+  31 -> 37: 1117.47 unidades
+  37 -> 1: 612.00 unidades
+  1 -> 17: 906.23 unidades
+  17 -> 3: 2613.49 unidades
+  3 -> 2: 817.15 unidades
+  2 -> 18: 1102.00 unidades
+  18 -> 10: 569.95 unidades
+  10 -> 32: 345.37 unidades
+  32 -> 27: 523.66 unidades
+  27 -> 16: 680.09 unidades
+  16 -> 25: 556.61 unidades
+  25 -> 23: 512.85 unidades
+  23 -> 22: 699.04 unidades
+  22 -> 15: 547.43 unidades
+  15 -> 26: 773.03 unidades
+  26 -> 11: 564.75 unidades
+  11 -> 19: 1107.26 unidades
+  19 -> 12: 666.69 unidades
+  12 -> 4: 365.17 unidades
+Distancia total del recorrido: 30424.31 unidades
 
 7. Expansión de la red
 (Pendiente de implementación)

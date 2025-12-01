@@ -1,9 +1,11 @@
 from cProfile import label
+import heapq
 import os
 import math
 from typing import List, Dict, Set, Tuple
 import matplotlib.pyplot as plt
 from collections import defaultdict, deque
+
 '''
 1. Instancias
 
@@ -1025,7 +1027,168 @@ Supón que puede hacerlo en un solo día, y que los patrones de las calles coinc
 
 Salidas: La secuencia de visita de los nodos, con la distancia de cada arista en el recorrido y el total de su suma. 
 '''
+# Dijkstra para obtener distancias minimas entre nodos
+def dijkstra_distancias(instancia: Instancia, source: int) -> Dict[int, float]:
+    calcular_longitudes_tuberias(instancia)
+    adj = defaultdict(list)
+    for a in instancia.aristas:
+        if a.longitud is None:
+            continue
+        adj[a.nodo1].append((a.nodo2, a.longitud))
+        adj[a.nodo2].append((a.nodo1, a.longitud))
+    dist = {nid: float('inf') for nid in instancia.nodos.keys()}
+    dist[source] = 0.0
+    pq = [(0.0, source)]
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]:
+            continue
+        for v, w in adj.get(u, []):
+            nd = d + w
+            if nd < dist[v]:
+                dist[v] = nd
+                heapq.heappush(pq, (nd, v))
+    return dist
 
+# matriz de distancias entre nodos
+def matriz_distancias(instancia: Instancia, nodos: List[int]) -> Dict[int, Dict[int, float]]:
+    M = {}
+    for u in nodos:
+        d = dijkstra_distancias(instancia, u)
+        M[u] = {v: d[v] for v in nodos}
+    return M
+
+# algoritmo del vecino mas cercano para obtener una ruta inicial
+def nearest_neighbor(M: Dict[int, Dict[int, float]], start: int) -> List[int]:
+    tour = [start]
+    unvisited = set(M.keys()) - {start}
+    while unvisited:
+        cur = tour[-1]
+        nxt = min(unvisited, key=lambda x: M[cur][x])
+        tour.append(nxt)
+        unvisited.remove(nxt)
+    tour.append(start)
+    return tour
+
+# two opt algoritmo para mejorar la ruta
+def two_opt(tour: List[int], M: Dict[int, Dict[int, float]]) -> List[int]:
+    improved = True
+    n = len(tour)
+    while improved:
+        improved = False
+        for i in range(1, n - 2):
+            for j in range(i + 1, n - 1):
+                a, b = tour[i - 1], tour[i]
+                c, d = tour[j], tour[j + 1]
+                delta = (M[a][c] + M[b][d]) - (M[a][b] + M[c][d])
+                # si hay mejora, realiza el swap (epsilón)
+                if delta < -1e-9:
+                    tour[i:j + 1] = reversed(tour[i:j + 1])
+                    improved = True
+        # repite hasta que no haya mejoras
+    return tour
+
+def generar_ruta_muestras(instancia: Instancia) -> Dict:
+    if instancia.office_id is None:
+        return {'tour': [], 'edges': [], 'total': 0.0}
+    nodos = list(instancia.nodos.keys())
+    M = matriz_distancias(instancia, nodos)
+    tour = nearest_neighbor(M, instancia.office_id)
+    tour = two_opt(tour, M)
+    edges = []
+    total = 0.0
+    for i in range(len(tour) - 1):
+        u, v = tour[i], tour[i + 1]
+        d = M[u][v]
+        edges.append((u, v, d))
+        total += d
+    return {'tour': tour, 'edges': edges, 'total': total}
+
+def graficar_ruta_muestras(instancia: Instancia, ruta_salida: str = None,
+                          etapa: str = "antes") -> None:
+    ruta_info = generar_ruta_muestras(instancia)
+    tour = ruta_info['tour']
+    edges = ruta_info['edges']
+    
+    fig, ax = plt.subplots(figsize=(14, 12))
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    for arista in instancia.aristas:
+        nodo1 = instancia.nodos[arista.nodo1]
+        nodo2 = instancia.nodos[arista.nodo2]
+        ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+               color='lightgray', linewidth=1.5, alpha=0.4, zorder=1)
+    
+    L = len(edges)
+    denom = max(1, L - 1) # evitar division por cero
+    cmap = plt.cm.hsv
+    norm_obj = plt.Normalize(vmin=0, vmax=denom)
+    colors = [cmap(i / denom) for i in range(L)]
+
+    # dibujar cada segmento del tour con su color correspondiente
+    for idx, (u, v, d) in enumerate(edges):
+        nodo1 = instancia.nodos[u]
+        nodo2 = instancia.nodos[v]
+        color = colors[idx]
+        ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+               color=color, linewidth=4, alpha=0.9, zorder=3)
+        # distancia en el punto medio
+        mid_x = (nodo1.x + nodo2.x) / 2.0
+        mid_y = (nodo1.y + nodo2.y) / 2.0
+        # desplazamiento para mayor claridad
+        dx = nodo2.x - nodo1.x
+        dy = nodo2.y - nodo1.y
+        seg_len = math.hypot(dx, dy) + 1e-9   # renamed from `norm`
+        off = 8.0 # offset para separar el texto de la línea
+        px = -dy / seg_len * off
+        py = dx / seg_len * off
+        ax.text(mid_x + px, mid_y + py, f"{d:.1f}", fontsize=8, ha='center', va='center',
+                bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.9),
+                zorder=5)
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm_obj)
+    sm.set_array([])
+    cbar = fig.colorbar(sm, ax=ax, fraction=0.03, pad=0.02, shrink=0.6)
+    # mostrar como porcentaje de progreso en el tour (0% .. 100%)
+    if L > 1:
+        ticks = [0, denom // 2, denom]
+        cbar.set_ticks(ticks)
+        cbar.set_ticklabels([f"0%", f"50%", f"100%"])
+    else:
+        cbar.set_ticks([0])
+        cbar.set_ticklabels(["0%"])
+    cbar.set_label('Posición en el recorrido (progreso)', fontsize=9, weight='bold')
+    cbar.ax.tick_params(labelsize=8)
+
+
+    for id_nodo, nodo in instancia.nodos.items():
+        ax.scatter(nodo.x, nodo.y, c='orange', s=150, marker='o',
+                  edgecolors='black', linewidths=1.5, zorder=5)
+        ax.text(nodo.x, nodo.y, str(id_nodo), fontsize=8,
+                ha='center', va='center', color='white',
+                weight='bold', zorder=6)
+    
+    if instancia.office_id in instancia.nodos:
+        office = instancia.nodos[instancia.office_id]
+        ax.scatter(office.x, office.y, c='yellow', s=350, marker='*',
+                  edgecolors='black', linewidths=2, zorder=7, label='Oficina')
+    
+    ax.set_xlabel('Coordenada X', fontsize=12)
+    ax.set_ylabel('Coordenada Y', fontsize=12)
+    titulo = (f'Ruta de Muestras de Agua - {instancia.nombre}\n'
+              f'Distancia Total: {ruta_info["total"]:.1f}')
+    ax.set_title(titulo, fontsize=14, weight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='upper right', fontsize=10)
+    ax.set_aspect('equal', adjustable='box')
+
+    plt.tight_layout()
+    if ruta_salida is None:
+        ruta_salida = obtener_ruta_grafica(instancia, "ruta_muestras", etapa)
+    plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
+    print(f"Gráfica de ruta de muestras guardada en: {ruta_salida}")
+    plt.close() 
 
 '''
 7. Expansion de la red
@@ -1145,7 +1308,11 @@ def guardar_resultados(instancia: Instancia, etapa: str = "antes",
 
         
         f.write("6. Muestra de calidad de agua\n")
-        f.write("(Pendiente de implementación)\n\n")
+        ruta_info = generar_ruta_muestras(instancia)
+        f.write(f"Ruta de muestreo iniciando y terminando en la oficina (nodo {instancia.office_id}):\n")
+        for u, v, d in ruta_info['edges']:
+            f.write(f"  {u} -> {v}: {d:.2f} unidades\n")
+        f.write(f"Distancia total del recorrido: {ruta_info['total']:.2f} unidades\n\n")
         
         f.write("7. Expansión de la red\n")
         f.write("(Pendiente de implementación)\n")
@@ -1158,6 +1325,7 @@ def procesar_instancia(instancia: Instancia, etapa: str = "antes") -> None:
     graficar_sectorizacion(instancia, etapa=etapa)
     graficar_frescura_agua(instancia, etapa=etapa)
     graficar_flujo_maximo_agua(instancia, etapa=etapa)
+    graficar_ruta_muestras(instancia, etapa=etapa) 
     guardar_resultados(instancia, etapa=etapa)
     
     #TODO: Implementar lo demas
