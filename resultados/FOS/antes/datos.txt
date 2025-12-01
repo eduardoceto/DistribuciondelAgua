@@ -173,7 +173,8 @@ Sector de la fuente 37:
 Ruta de muestreo iniciando y terminando en la oficina (nodo 4):
   4 -> 5: 1432.86 unidades
   5 -> 13: 528.72 unidades
-  13 -> 20: 1023.58 unidades
+  13 -> 14: 762.00 unidades
+  14 -> 20: 261.58 unidades
   20 -> 14: 261.58 unidades
   14 -> 21: 440.06 unidades
   21 -> 6: 1426.62 unidades
@@ -186,13 +187,16 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 4):
   30 -> 9: 841.50 unidades
   9 -> 36: 1253.32 unidades
   36 -> 35: 566.47 unidades
-  35 -> 33: 1361.76 unidades
+  35 -> 34: 1121.14 unidades
+  34 -> 33: 240.62 unidades
   33 -> 34: 240.62 unidades
   34 -> 31: 413.68 unidades
-  31 -> 37: 1117.47 unidades
+  31 -> 1: 505.47 unidades
+  1 -> 37: 612.00 unidades
   37 -> 1: 612.00 unidades
   1 -> 17: 906.23 unidades
-  17 -> 3: 2613.49 unidades
+  17 -> 2: 1796.34 unidades
+  2 -> 3: 817.15 unidades
   3 -> 2: 817.15 unidades
   2 -> 18: 1102.00 unidades
   18 -> 10: 569.95 unidades

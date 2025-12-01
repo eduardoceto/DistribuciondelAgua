@@ -105,15 +105,21 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 5):
   15 -> 14: 281.11 unidades
   14 -> 13: 351.43 unidades
   13 -> 12: 213.41 unidades
-  12 -> 19: 671.67 unidades
+  12 -> 18: 362.02 unidades
+  18 -> 19: 309.65 unidades
   19 -> 18: 309.65 unidades
-  18 -> 20: 985.15 unidades
+  18 -> 12: 362.02 unidades
+  12 -> 11: 236.54 unidades
+  11 -> 20: 386.59 unidades
   20 -> 16: 426.41 unidades
-  16 -> 17: 1136.12 unidades
+  16 -> 9: 480.84 unidades
+  9 -> 10: 182.21 unidades
+  10 -> 17: 473.07 unidades
   17 -> 10: 473.07 unidades
   10 -> 9: 182.21 unidades
   9 -> 11: 275.14 unidades
-  11 -> 8: 460.56 unidades
+  11 -> 9: 275.14 unidades
+  9 -> 8: 185.42 unidades
   8 -> 7: 187.95 unidades
   7 -> 6: 187.38 unidades
   6 -> 5: 211.61 unidades

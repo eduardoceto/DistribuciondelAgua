@@ -1094,14 +1094,37 @@ def generar_ruta_muestras(instancia: Instancia) -> Dict:
     nodos = list(instancia.nodos.keys())
     M = matriz_distancias(instancia, nodos)
     tour = nearest_neighbor(M, instancia.office_id)
+    grafo = construir_grafo(instancia)
     tour = two_opt(tour, M)
+
     edges = []
     total = 0.0
     for i in range(len(tour) - 1):
         u, v = tour[i], tour[i + 1]
-        d = M[u][v]
-        edges.append((u, v, d))
-        total += d
+        path, dist = camino_en_red(instancia, grafo, u, v)
+        if not path:
+            # si no existe camino, intentar sumar la distancia métrica como fallback
+            d = M.get(u, {}).get(v, float('inf'))
+            if d < float('inf'):
+                edges.append((u, v, d))
+                total += d
+            continue
+
+        # path es lista de nodos [u, ..., v]; convertir en segmentos adyacentes
+        for j in range(len(path) - 1):
+            a, b = path[j], path[j + 1]
+            ar = next((ar for ar in instancia.aristas
+                       if (ar.nodo1 == a and ar.nodo2 == b) or
+                          (ar.nodo1 == b and ar.nodo2 == a)), None)
+            if ar is None:
+                # no debería ocurrir, pero en caso de inconsistencia usar euclidiana
+                segd = distancia_euclidiana(instancia.nodos[a].x, instancia.nodos[a].y,
+                                            instancia.nodos[b].x, instancia.nodos[b].y)
+            else:
+                segd = ar.longitud if ar.longitud is not None else calcular_longitud_arista(instancia, ar)
+            edges.append((a, b, segd))
+            total += segd
+
     return {'tour': tour, 'edges': edges, 'total': total}
 
 def graficar_ruta_muestras(instancia: Instancia, ruta_salida: str = None,

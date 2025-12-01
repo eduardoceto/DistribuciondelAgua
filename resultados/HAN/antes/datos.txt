@@ -125,12 +125,19 @@ Sector de la fuente 1:
 Ruta de muestreo iniciando y terminando en la oficina (nodo 29):
   29 -> 28: 1398.45 unidades
   28 -> 23: 1132.51 unidades
-  23 -> 22: 3296.33 unidades
+  23 -> 20: 1609.32 unidades
+  20 -> 21: 1287.46 unidades
+  21 -> 22: 399.55 unidades
   22 -> 21: 399.55 unidades
   21 -> 20: 1287.46 unidades
-  20 -> 1: 2849.62 unidades
+  20 -> 3: 1437.33 unidades
+  3 -> 2: 1003.26 unidades
+  2 -> 1: 409.03 unidades
   1 -> 2: 409.03 unidades
-  2 -> 17: 2830.21 unidades
+  2 -> 3: 1003.26 unidades
+  3 -> 19: 606.08 unidades
+  19 -> 18: 677.03 unidades
+  18 -> 17: 543.84 unidades
   17 -> 18: 543.84 unidades
   18 -> 19: 677.03 unidades
   19 -> 3: 606.08 unidades
@@ -140,7 +147,10 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 29):
   6 -> 7: 649.25 unidades
   7 -> 8: 944.62 unidades
   8 -> 9: 954.50 unidades
-  9 -> 13: 4008.62 unidades
+  9 -> 10: 788.02 unidades
+  10 -> 11: 697.87 unidades
+  11 -> 12: 839.54 unidades
+  12 -> 13: 1683.19 unidades
   13 -> 12: 1683.19 unidades
   12 -> 11: 839.54 unidades
   11 -> 10: 697.87 unidades
@@ -151,7 +161,8 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 29):
   27 -> 26: 856.07 unidades
   26 -> 25: 1097.00 unidades
   25 -> 24: 1053.29 unidades
-  24 -> 32: 2497.30 unidades
+  24 -> 25: 1053.29 unidades
+  25 -> 32: 1444.01 unidades
   32 -> 31: 1085.81 unidades
   31 -> 30: 768.58 unidades
   30 -> 29: 1780.86 unidades
