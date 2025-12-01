@@ -65,7 +65,35 @@ Sector de la fuente 19:
 
 
 5. Flujo máximo de cada sector
-(Pendiente de implementación)
+
+Sector de la fuente 17:
+  El nodo más lejano es el 3.
+  Flujo máximo desde la fuente hasta el nodo más lejano: 73.00 unidades.
+  Uso de tuberías:
+    Tubería 3 - 4: uso 73.00 / capacidad 183.00
+    Tubería 4 - 5: uso 73.00 / capacidad 181.00
+    Tubería 5 - 6: uso 73.00 / capacidad 181.00
+    Tubería 6 - 7: uso 73.00 / capacidad 181.00
+    Tubería 7 - 8: uso 73.00 / capacidad 133.00
+    Tubería 8 - 9: uso 73.00 / capacidad 133.00
+    Tubería 9 - 10: uso 73.00 / capacidad 183.00
+    Tubería 10 - 17: uso 73.00 / capacidad 73.00
+    Tubería 20 - 16: uso 0.00 / capacidad 63.00
+    Tubería 9 - 16: uso 0.00 / capacidad 75.00
+
+Sector de la fuente 19:
+  El nodo más lejano es el 2.
+  Flujo máximo desde la fuente hasta el nodo más lejano: 61.00 unidades.
+  Uso de tuberías:
+    Tubería 1 - 2: uso 61.00 / capacidad 181.00
+    Tubería 12 - 11: uso 0.00 / capacidad 207.00
+    Tubería 13 - 12: uso 61.00 / capacidad 205.00
+    Tubería 14 - 13: uso 61.00 / capacidad 205.00
+    Tubería 15 - 14: uso 61.00 / capacidad 205.00
+    Tubería 1 - 15: uso 61.00 / capacidad 207.00
+    Tubería 12 - 18: uso 61.00 / capacidad 75.00
+    Tubería 18 - 19: uso 61.00 / capacidad 61.00
+
 
 6. Muestra de calidad de agua
 (Pendiente de implementación)

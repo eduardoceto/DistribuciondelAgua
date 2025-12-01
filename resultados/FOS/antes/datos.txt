@@ -107,7 +107,67 @@ Sector de la fuente 37:
 
 
 5. Flujo máximo de cada sector
-(Pendiente de implementación)
+
+Sector de la fuente 7:
+  El nodo más lejano es el 12.
+  Flujo máximo desde la fuente hasta el nodo más lejano: 55.00 unidades.
+  Uso de tuberías:
+    Tubería 4 - 5: uso 19.00 / capacidad 29.00
+    Tubería 5 - 6: uso 19.00 / capacidad 19.00
+    Tubería 6 - 7: uso 19.00 / capacidad 19.00
+    Tubería 7 - 24: uso 9.00 / capacidad 17.00
+    Tubería 24 - 8: uso 0.00 / capacidad 17.00
+    Tubería 8 - 28: uso 0.00 / capacidad 17.00
+    Tubería 19 - 12: uso 17.00 / capacidad 76.60
+    Tubería 12 - 4: uso 19.00 / capacidad 41.80
+    Tubería 16 - 25: uso 0.00 / capacidad 64.40
+    Tubería 25 - 8: uso 0.00 / capacidad 35.60
+    Tubería 26 - 15: uso 0.00 / capacidad 91.00
+    Tubería 15 - 22: uso 17.00 / capacidad 62.40
+    Tubería 22 - 7: uso 27.00 / capacidad 27.00
+    Tubería 5 - 13: uso 0.00 / capacidad 19.00
+    Tubería 13 - 14: uso 19.00 / capacidad 19.00
+    Tubería 14 - 20: uso 0.00 / capacidad 41.80
+    Tubería 20 - 15: uso 17.00 / capacidad 54.40
+    Tubería 15 - 16: uso 0.00 / capacidad 19.00
+    Tubería 12 - 13: uso 19.00 / capacidad 43.80
+    Tubería 19 - 20: uso 17.00 / capacidad 17.00
+    Tubería 14 - 21: uso 19.00 / capacidad 35.60
+    Tubería 21 - 6: uso 0.00 / capacidad 35.60
+    Tubería 21 - 22: uso 19.00 / capacidad 43.80
+    Tubería 22 - 23: uso 9.00 / capacidad 17.00
+    Tubería 24 - 23: uso 9.00 / capacidad 33.60
+    Tubería 23 - 25: uso 0.00 / capacidad 54.40
+
+Sector de la fuente 37:
+  El nodo más lejano es el 29.
+  Flujo máximo desde la fuente hasta el nodo más lejano: 52.60 unidades.
+  Uso de tuberías:
+    Tubería 1 - 17: uso 0.00 / capacidad 43.80
+    Tubería 17 - 2: uso 0.00 / capacidad 19.00
+    Tubería 2 - 3: uso 0.00 / capacidad 17.00
+    Tubería 9 - 36: uso 17.00 / capacidad 33.60
+    Tubería 36 - 1: uso 17.00 / capacidad 54.40
+    Tubería 1 - 31: uso 35.60 / capacidad 205.60
+    Tubería 31 - 10: uso 0.00 / capacidad 187.00
+    Tubería 10 - 11: uso 0.00 / capacidad 148.20
+    Tubería 2 - 18: uso 0.00 / capacidad 43.80
+    Tubería 18 - 10: uso 0.00 / capacidad 74.60
+    Tubería 10 - 32: uso 0.00 / capacidad 103.20
+    Tubería 32 - 27: uso 0.00 / capacidad 91.00
+    Tubería 3 - 11: uso 0.00 / capacidad 41.80
+    Tubería 29 - 30: uso 17.00 / capacidad 17.00
+    Tubería 30 - 9: uso 17.00 / capacidad 17.00
+    Tubería 17 - 18: uso 0.00 / capacidad 17.00
+    Tubería 29 - 33: uso 35.60 / capacidad 35.60
+    Tubería 32 - 33: uso 0.00 / capacidad 19.00
+    Tubería 33 - 34: uso 35.60 / capacidad 54.40
+    Tubería 31 - 34: uso 35.60 / capacidad 74.60
+    Tubería 34 - 35: uso 0.00 / capacidad 33.60
+    Tubería 30 - 35: uso 0.00 / capacidad 23.40
+    Tubería 35 - 36: uso 0.00 / capacidad 35.60
+    Tubería 37 - 1: uso 52.60 / capacidad 232.20
+
 
 6. Muestra de calidad de agua
 (Pendiente de implementación)

@@ -1,3 +1,4 @@
+from cProfile import label
 import os
 import math
 from typing import List, Dict, Set, Tuple
@@ -761,6 +762,258 @@ Salidas:  Por cada sector, sus nodos origen, destino, y flujo máximo.
 Además, por cada tubería (arista) del sector, cuanta de su capacidad se utiliza. Ej. 50 de 200.
 '''
 
+def calcular_flujo_maximo(instancia: Instancia) -> Dict:
+    asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+    grafo_sector = construir_grafo_sector(instancia, aristas_cerradas)
+    fuentes = instancia.obtener_fuentes()
+    calcular_longitudes_tuberias(instancia)
+
+    # Encontrar el nodo más lejano de la fuente en cada sector y su camino
+    caminos_a_explorar = {}
+    for fuente in fuentes:
+        distancias = {fuente.id: 0.0}
+        predecesores = {fuente.id: None}
+        cola = deque([fuente.id])
+
+        while cola:
+            actual = cola.popleft()
+            for vecino in grafo_sector.get(actual, []):
+                if vecino not in distancias:
+                    arista = next(
+                        (a for a in instancia.aristas
+                         if (a.nodo1 == actual and a.nodo2 == vecino) or
+                            (a.nodo1 == vecino and a.nodo2 == actual)), None)
+                    if arista and arista.longitud is not None:
+                        distancias[vecino] = distancias[actual] + arista.longitud
+                        predecesores[vecino] = actual
+                        cola.append(vecino)
+
+        sector_nodos = [nid for nid, fid in asignacion_sector.items() if fid == fuente.id and nid != fuente.id]
+
+        max_dist = 0.0
+        nodo_mas_lejano = None
+        for nodo_id in sector_nodos:
+            if nodo_id in distancias and distancias[nodo_id] > max_dist:
+                max_dist = distancias[nodo_id]
+                nodo_mas_lejano = nodo_id
+
+        if nodo_mas_lejano:
+            caminos_a_explorar[fuente.id] = {
+                'nodo_mas_lejano': nodo_mas_lejano
+            }
+
+    # Helper: construir capacidades dirigidas para el sector (ambas direcciones igual a capacidad original)
+    def construir_capacidades_para_sector(fuente_id: int):
+        capacity = {}
+        nodes_in_sector = {nid for nid, fid in asignacion_sector.items() if fid == fuente_id}
+        adj = defaultdict(set)
+        for ar in instancia.aristas:
+            par = (min(ar.nodo1, ar.nodo2), max(ar.nodo1, ar.nodo2))
+            if par in aristas_cerradas:
+                continue
+            if ar.nodo1 in nodes_in_sector and ar.nodo2 in nodes_in_sector:
+                # crea aristas dirigidas en ambas direcciones con capacidad = ar.capacidad
+                capacity[(ar.nodo1, ar.nodo2)] = ar.capacidad
+                capacity[(ar.nodo2, ar.nodo1)] = ar.capacidad
+                adj[ar.nodo1].add(ar.nodo2)
+                adj[ar.nodo2].add(ar.nodo1)
+        return capacity, adj
+
+    # Implementación de Edmonds-Karp 
+    def edmonds_karp(capacity: Dict[Tuple[int,int], float], adj: Dict[int, Set[int]], s: int, t: int):
+        flow = defaultdict(float)  # flujo actual por arista (u,v)
+        max_flow = 0.0
+
+        while True:
+            parent = {}
+            q = deque([s])
+            parent[s] = None
+            # BFS para encontrar camino aumentante en la red
+            while q and t not in parent:
+                u = q.popleft()
+                for v in adj.get(u, []):
+                    cap = capacity.get((u, v), 0.0)
+                    used = flow.get((u, v), 0.0)
+                    residual = cap - used
+                    if residual > 1e-9 and v not in parent:
+                        parent[v] = u
+                        q.append(v)
+            if t not in parent:
+                break  # no hay más caminos
+
+            # encuentra bottleneck
+            v = t
+            bottleneck = float('inf')
+            while parent[v] is not None:
+                u = parent[v]
+                cap = capacity.get((u, v), 0.0)
+                used = flow.get((u, v), 0.0)
+                residual = cap - used
+                bottleneck = min(bottleneck, residual)
+                v = parent[v]
+
+            # actualiza flujos
+            v = t
+            while parent[v] is not None:
+                u = parent[v]
+                flow[(u, v)] = flow.get((u, v), 0.0) + bottleneck
+                # mantiene la entrada inversa para cálculos netos
+                flow[(v, u)] = flow.get((v, u), 0.0) - bottleneck
+                v = parent[v]
+
+            max_flow += bottleneck
+
+        return max_flow, flow
+
+    resultados = {}
+    for fuente_id, info in caminos_a_explorar.items():
+        sink = info['nodo_mas_lejano']
+        capacity, adj = construir_capacidades_para_sector(fuente_id)
+
+        if not capacity or fuente_id == sink:
+            resultados[fuente_id] = {
+                'fuente': fuente_id,
+                'nodo_mas_lejano': sink,
+                'flujo_maximo': 0.0,
+                'uso_tuberias': []
+            }
+            continue
+
+        flujo_max, flujo_por_arista = edmonds_karp(capacity, adj, fuente_id, sink)
+
+        uso_tuberias = []
+        # Reportar uso neto por arista (undirected): tomar flow[(u,v)]
+        for ar in instancia.aristas:
+            par = (min(ar.nodo1, ar.nodo2), max(ar.nodo1, ar.nodo2))
+            if par in aristas_cerradas:
+                continue
+            # Solo interesan aristas totalmente dentro del sector actual
+            if asignacion_sector.get(ar.nodo1) != fuente_id or asignacion_sector.get(ar.nodo2) != fuente_id:
+                continue
+            net = flujo_por_arista.get((ar.nodo1, ar.nodo2), 0.0)
+            uso = abs(net)
+            uso_tuberias.append({
+                'nodo1': ar.nodo1,
+                'nodo2': ar.nodo2,
+                'capacidad': ar.capacidad,
+                'uso': uso
+            })
+
+        resultados[fuente_id] = {
+            'fuente': fuente_id,
+            'nodo_mas_lejano': sink,
+            'flujo_maximo': flujo_max,
+            'uso_tuberias': uso_tuberias
+        }
+
+    return resultados
+
+
+def graficar_flujo_maximo_agua(instancia: Instancia, ruta_salida: str = None,
+                          etapa: str = "antes") -> None:
+    asignacion_sector, aristas_cerradas = sectorizar_red(instancia)
+    flujo_maximo = calcular_flujo_maximo(instancia)
+    fuentes = instancia.obtener_fuentes()
+    
+    fig, ax = plt.subplots(figsize=(14, 12))
+    
+    calcular_longitudes_tuberias(instancia)
+    
+    colores_sectores = ['#1f77b4', '#d62728', '#ff7f0e', '#2ca02c', 
+                       '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    
+    fuente_a_color = {}
+    for i, fuente in enumerate(fuentes):
+        fuente_a_color[fuente.id] = colores_sectores[i % len(colores_sectores)]
+    
+    for arista in instancia.aristas:
+        par = (min(arista.nodo1, arista.nodo2),
+               max(arista.nodo1, arista.nodo2))
+        if par not in aristas_cerradas:
+            nodo1 = instancia.nodos[arista.nodo1]
+            nodo2 = instancia.nodos[arista.nodo2]
+            sector = asignacion_sector[arista.nodo1]
+            color = fuente_a_color.get(sector, 'gray')
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                   color=color, linewidth=1.5, alpha=0.4, zorder=1)
+    
+    for nodo1_id, nodo2_id in aristas_cerradas:
+        nodo1 = instancia.nodos[nodo1_id]
+        nodo2 = instancia.nodos[nodo2_id]
+        ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+               color='black', linewidth=1, linestyle='--',
+               alpha=0.2, zorder=1)
+    
+    for fuente_id, info in flujo_maximo.items():
+        color = fuente_a_color.get(fuente_id, 'gray')
+
+        for uso_info in info['uso_tuberias']:
+            nodo1 = instancia.nodos[uso_info['nodo1']]
+            nodo2 = instancia.nodos[uso_info['nodo2']]
+            uso = uso_info.get('uso', 0.0)
+            capacidad = uso_info.get('capacidad', 0.0)
+            ratio = (uso / capacidad) if capacidad > 0 else 0.0
+            ancho_linea = max(0.8, min(8.0, 6 * ratio))
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                   color=color, linewidth=ancho_linea, alpha=0.8, zorder=2)
+            mid_x = (nodo1.x + nodo2.x) / 2.0
+            mid_y = (nodo1.y + nodo2.y) / 2.0
+            etiqueta = f"{uso:.1f}/{capacidad:.1f}"
+            ax.text(mid_x, mid_y, etiqueta, fontsize=7, ha='center', va='center',
+                    bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.8),
+                    zorder=4)
+            
+
+    for id_nodo, nodo in instancia.nodos.items():
+        sector = asignacion_sector.get(id_nodo)
+        color = fuente_a_color.get(sector, 'gray')
+        
+        es_fuente = nodo.es_fuente
+        es_mas_lejano = any(info['nodo_mas_lejano'] == id_nodo 
+                           for info in flujo_maximo.values())
+        
+        if es_fuente:
+            ax.scatter(nodo.x, nodo.y, c=color, s=500, marker='o',
+                      edgecolors='black', linewidths=3, zorder=5)
+        elif es_mas_lejano:
+            ax.scatter(nodo.x, nodo.y, c=color, s=400, marker='s',
+                      edgecolors='black', linewidths=3, zorder=5)
+        else:
+            ax.scatter(nodo.x, nodo.y, c=color, s=120, marker='o',
+                      edgecolors='black', linewidths=1.5, zorder=4)
+        
+        ax.text(nodo.x, nodo.y, str(id_nodo), fontsize=8,
+                ha='center', va='center', color='white',
+                weight='bold', zorder=6)
+    
+    if instancia.office_id in instancia.nodos:
+        office = instancia.nodos[instancia.office_id]
+        ax.scatter(office.x, office.y, c='yellow', s=350, marker='*',
+                  edgecolors='black', linewidths=2, zorder=7, label='Oficina')
+    
+    ax.set_xlabel('Coordenada X', fontsize=12)
+    ax.set_ylabel('Coordenada Y', fontsize=12)
+    
+    info_flujo_maximo = '\n'.join([f"Fuente {info['fuente']} -> Nodo {info['nodo_mas_lejano']}: "
+                              f"{info['flujo_maximo']:.1f} (flujo maximo)" 
+                              for info in flujo_maximo.values()])
+    
+    titulo = (f'Flujo Maximo de Agua - {instancia.nombre}\n'
+              f'{info_flujo_maximo}')
+    ax.set_title(titulo, fontsize=14, weight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='upper right', fontsize=10)
+    ax.set_aspect('equal', adjustable='box')
+    
+    plt.tight_layout()
+    
+    if ruta_salida is None:
+        ruta_salida = obtener_ruta_grafica(instancia, "flujo_maximo", etapa)
+    
+    plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
+    print(f"Gráfica de flujo maximo guardada en: {ruta_salida}")
+    plt.close()
+
 
 '''
 6. Mustra de calidad de agua
@@ -877,7 +1130,19 @@ def guardar_resultados(instancia: Instancia, etapa: str = "antes",
         f.write("\n\n")
         
         f.write("5. Flujo máximo de cada sector\n")
-        f.write("(Pendiente de implementación)\n\n")
+        flujo_maximo = calcular_flujo_maximo(instancia)
+
+        for fuente_id, info in flujo_maximo.items():
+            f.write(f"\nSector de la fuente {fuente_id}:\n")
+            f.write(f"  El nodo más lejano es el {info['nodo_mas_lejano']}.\n")
+            f.write(f"  Flujo máximo desde la fuente hasta el nodo más lejano: {info['flujo_maximo']:.2f} unidades.\n")
+            f.write("  Uso de tuberías:\n")
+            for uso_info in info['uso_tuberias']:
+                f.write(f"    Tubería {uso_info['nodo1']} - {uso_info['nodo2']}: "
+                       f"uso {uso_info['uso']:.2f} / capacidad {uso_info['capacidad']:.2f}\n")
+       
+        f.write("\n\n")
+
         
         f.write("6. Muestra de calidad de agua\n")
         f.write("(Pendiente de implementación)\n\n")
@@ -892,6 +1157,7 @@ def procesar_instancia(instancia: Instancia, etapa: str = "antes") -> None:
     graficar_red(instancia, etapa=etapa)
     graficar_sectorizacion(instancia, etapa=etapa)
     graficar_frescura_agua(instancia, etapa=etapa)
+    graficar_flujo_maximo_agua(instancia, etapa=etapa)
     guardar_resultados(instancia, etapa=etapa)
     
     #TODO: Implementar lo demas
