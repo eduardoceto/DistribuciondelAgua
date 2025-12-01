@@ -1,10 +1,10 @@
 Resultados para la instancia PES
-Estado: antes de agregar nodos nuevos
+Estado: despues de agregar nodos nuevos
 
 1. Información básica
-La red tiene 71 nodos y 99 aristas.
+La red tiene 73 nodos y 101 aristas.
 La oficina se encuentra en el nodo 51.
-Hay 2 nuevos nodos pendientes de agregar.
+Hay 0 nuevos nodos pendientes de agregar.
 
 Se encontraron 2 fuentes:
   Nodo 1 en (656582.88, 963296.25)
@@ -12,8 +12,8 @@ Se encontraron 2 fuentes:
 
 
 2. Longitud de las tuberías
-La red tiene una longitud total de 42908.87 unidades.
-Longitud promedio: 433.42, mínima: 3.57, máxima: 1605.88
+La red tiene una longitud total de 43918.30 unidades.
+Longitud promedio: 434.83, mínima: 3.57, máxima: 1605.88
 
 Detalle de aristas:
   1 -> 2: 741.69 unidades, capacidad 101.0
@@ -115,6 +115,8 @@ Detalle de aristas:
   84 -> 88: 113.37 unidades, capacidad 101.0
   88 -> 89: 150.82 unidades, capacidad 103.0
   55 -> 86: 240.74 unidades, capacidad 103.0
+  90 -> 3: 363.68 unidades, capacidad 120.0
+  91 -> 25: 645.74 unidades, capacidad 105.0
 
 
 3. Sectorización
@@ -122,8 +124,8 @@ La red se dividió en 2 sectores.
 Se cerraron 2 tuberías entre sectores.
 
 Distribución de nodos por sector:
-  Sector 1 (fuente 1): 38 nodos - 1, 2, 3, 4, 5, 10, 11, 19, 31, 32, 37, 38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 84, 86, 87, 88, 89
-  Sector 7 (fuente 7): 33 nodos - 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 33, 34, 35, 36, 39, 40, 41, 65, 76, 82, 83, 85
+  Sector 1 (fuente 1): 39 nodos - 1, 2, 3, 4, 5, 10, 11, 19, 31, 32, 37, 38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 84, 86, 87, 88, 89, 90
+  Sector 7 (fuente 7): 34 nodos - 6, 7, 8, 9, 12, 13, 14, 15, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 33, 34, 35, 36, 39, 40, 41, 65, 76, 82, 83, 85, 91
 
 Tuberías cerradas:
   19 - 20
@@ -200,6 +202,7 @@ Sector de la fuente 1:
     Tubería 84 - 88: uso 0.00 / capacidad 101.00
     Tubería 88 - 89: uso 0.00 / capacidad 103.00
     Tubería 55 - 86: uso 0.00 / capacidad 103.00
+    Tubería 90 - 3: uso 0.00 / capacidad 120.00
 
 Sector de la fuente 7:
   El nodo más lejano es el 21.
@@ -249,6 +252,7 @@ Sector de la fuente 7:
     Tubería 22 - 85: uso 0.00 / capacidad 101.00
     Tubería 26 - 83: uso 0.00 / capacidad 101.00
     Tubería 83 - 85: uso 0.00 / capacidad 101.00
+    Tubería 91 - 25: uso 0.00 / capacidad 105.00
 
 
 6. Muestra de calidad de agua
@@ -264,6 +268,8 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 51):
   62 -> 2: 740.87 unidades
   2 -> 4: 192.83 unidades
   4 -> 3: 442.94 unidades
+  3 -> 90: 363.68 unidades
+  90 -> 3: 363.68 unidades
   3 -> 1: 269.63 unidades
   1 -> 3: 269.63 unidades
   3 -> 5: 1123.65 unidades
@@ -303,6 +309,8 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 51):
   26 -> 17: 3.57 unidades
   17 -> 24: 200.06 unidades
   24 -> 25: 918.87 unidades
+  25 -> 91: 645.74 unidades
+  91 -> 25: 645.74 unidades
   25 -> 12: 365.48 unidades
   12 -> 39: 1124.50 unidades
   39 -> 34: 310.72 unidades
@@ -350,10 +358,5 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 51):
   56 -> 47: 52.38 unidades
   47 -> 48: 230.10 unidades
   48 -> 51: 155.95 unidades
-Distancia total del recorrido: 35627.54 unidades
-
-7. Expansión de la red
-Se agregaran 2 nuevas aristas:
-  Nueva arista 90 - 3: longitud 363.68 unidades, capacidad 120.00
-  Nueva arista 91 - 25: longitud 645.74 unidades, capacidad 105.00
+Distancia total del recorrido: 37646.39 unidades
 

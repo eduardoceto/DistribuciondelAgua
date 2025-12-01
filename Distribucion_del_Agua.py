@@ -1224,8 +1224,89 @@ Se repiten los pasos 2, 3, 4, 5 y 6 para la nueva red.
 
 Salidas: Las aristas nuevas del nodo, y su longitud. Para mostrar la actualización, crea dos archivos con el antes y el después. 
 '''
+def expandir_red(instancia: Instancia, commit: bool = True):
+    if not commit:
+        instancia_preview = copiar_instancia(instancia)
+        # si commit es False, trabajar sobre la copia
+        nuevas = expandir_red(instancia_preview, commit=True)
+        return nuevas, instancia_preview
+
+    nuevas_aristas = []
+    calcular_longitudes_tuberias(instancia)
+
+    for nuevo in instancia.nuevos_nodos:
+        # buscar nodo no-fuente más cercano
+        min_dist = float('inf')
+        nodo_cercano_id = None
+        for nodo in instancia.nodos.values():
+            if nodo.es_fuente:
+                continue
+            dist = distancia_euclidiana(nuevo.x, nuevo.y, nodo.x, nodo.y)
+            if dist < min_dist:
+                min_dist = dist
+                nodo_cercano_id = nodo.id
+        # si no hay nodos no-fuente, elegir cualquier nodo existente
+        if nodo_cercano_id is None and instancia.nodos:
+            nodo_cercano_id = next(iter(instancia.nodos.keys()))
+        # crear nuevo nodo y arista (se modifica la instancia)
+        nuevo_id = instancia.agregar_nodo_expansion(nuevo.x, nuevo.y, es_fuente=False)
+        ar = Arista(nuevo_id, nodo_cercano_id, capacidad=nuevo.diametro)
+        ar.longitud = calcular_longitud_arista(instancia, ar)
+        instancia.aristas.append(ar)
+        instancia.num_aristas += 1
+        nuevas_aristas.append(ar)
+
+    instancia.nuevos_nodos.clear()
+    return nuevas_aristas
 
 
+def graficar_red_actualizada(instancia: Instancia, ruta_salida: str = None,
+                            etapa: str = "despues") -> None:
+        fig, ax = plt.subplots(figsize=(14, 12))
+    
+        aristas_nuevas, instancia_preview = expandir_red(instancia, commit=False)    
+
+        for arista in instancia_preview.aristas:
+            nodo1 = instancia_preview.nodos[arista.nodo1]
+            nodo2 = instancia_preview.nodos[arista.nodo2]
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                 color='lightblue', linewidth=1.5, alpha=0.6, zorder=1)
+        
+        for arista in aristas_nuevas:
+            nodo1 = instancia_preview.nodos[arista.nodo1]
+            nodo2 = instancia_preview.nodos[arista.nodo2]
+            ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                 color='green', linewidth=3, alpha=0.9, zorder=3,
+                 label='Nueva Tubería' if 'Nueva Tubería' not in ax.get_legend_handles_labels()[1] else "")
+            
+        for id_nodo, nodo in instancia_preview.nodos.items():
+            color = 'red' if nodo.es_fuente else 'blue'
+            size = 500 if nodo.es_fuente else 150
+            ax.scatter(nodo.x, nodo.y, c=color, s=size, marker='o',
+                    edgecolors='black', linewidths=1.5, zorder=4)
+            ax.text(nodo.x, nodo.y, str(id_nodo), fontsize=8,
+                    ha='center', va='center', color='white',
+                    weight='bold', zorder=5)
+        
+        if instancia_preview.office_id in instancia_preview.nodos:
+            office = instancia_preview.nodos[instancia_preview.office_id]
+            ax.scatter(office.x, office.y, c='yellow', s=350, marker='*',
+                    edgecolors='black', linewidths=2, zorder=6, label='Oficina')
+        
+        ax.set_xlabel('Coordenada X', fontsize=12)
+        ax.set_ylabel('Coordenada Y', fontsize=12)
+        titulo = (f'Red Actualizada - {instancia.nombre} ({etapa})')
+        ax.set_title(titulo, fontsize=14, weight='bold')
+        ax.grid(True, alpha=0.3)
+        ax.legend(loc='upper right', fontsize=10)
+        ax.set_aspect('equal', adjustable='box')
+    
+        plt.tight_layout()
+        if ruta_salida is None:
+            ruta_salida = obtener_ruta_grafica(instancia, "red_actualizada", etapa)
+        plt.savefig(ruta_salida, dpi=300, bbox_inches='tight', format='png')
+        print(f"Gráfica de red actualizada guardada en: {ruta_salida}")
+        plt.close()
 
 '''
 Coloca las salidas en dos archivos de texto (antes y después de agregar los nodos nuevos). Dale a estos archivos nombres que coincidan con el nombre las instancias de prueba.
@@ -1337,8 +1418,17 @@ def guardar_resultados(instancia: Instancia, etapa: str = "antes",
             f.write(f"  {u} -> {v}: {d:.2f} unidades\n")
         f.write(f"Distancia total del recorrido: {ruta_info['total']:.2f} unidades\n\n")
         
-        f.write("7. Expansión de la red\n")
-        f.write("(Pendiente de implementación)\n")
+        if etapa == "antes":
+            f.write("7. Expansión de la red\n")
+            datos_nuevas, inst_expandida = expandir_red(instancia, commit=False)
+            if datos_nuevas:
+                f.write(f"Se agregaran {len(datos_nuevas)} nuevas aristas:\n")
+                for ar in datos_nuevas:
+                    f.write(f"  Nueva arista {ar.nodo1} - {ar.nodo2}: "
+                        f"longitud {ar.longitud:.2f} unidades, "
+                        f"capacidad {ar.capacidad:.2f}\n")
+                f.write("\n")
+                    
     
     print(f"Resultados guardados en: {ruta_archivo}")
 
@@ -1350,9 +1440,6 @@ def procesar_instancia(instancia: Instancia, etapa: str = "antes") -> None:
     graficar_flujo_maximo_agua(instancia, etapa=etapa)
     graficar_ruta_muestras(instancia, etapa=etapa) 
     guardar_resultados(instancia, etapa=etapa)
-    
-    #TODO: Implementar lo demas
-
 
 if __name__ == "__main__":
     instancias = cargar_todas_las_instancias("instancias")
@@ -1362,9 +1449,6 @@ if __name__ == "__main__":
     for nombre, instancia in instancias.items():
         print(f"Procesando instancia: {nombre}")
         procesar_instancia(instancia, etapa="antes")
-        
-        # TODO: Implementar expansión de red (punto 7)
-        # instancia_expandida = copiar_instancia(instancia)
-        # expandir_red(instancia_expandida)
-        # procesar_instancia(instancia_expandida, etapa="despues")
-    
+        graficar_red_actualizada(instancia, etapa="antes")
+        expandir_red(instancia, commit=True)
+        procesar_instancia(instancia, etapa="despues")

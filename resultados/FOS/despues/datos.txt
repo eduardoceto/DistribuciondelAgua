@@ -1,10 +1,10 @@
 Resultados para la instancia FOS
-Estado: antes de agregar nodos nuevos
+Estado: despues de agregar nodos nuevos
 
 1. Información básica
-La red tiene 37 nodos y 58 aristas.
+La red tiene 39 nodos y 60 aristas.
 La oficina se encuentra en el nodo 4.
-Hay 2 nuevos nodos pendientes de agregar.
+Hay 0 nuevos nodos pendientes de agregar.
 
 Se encontraron 2 fuentes:
   Nodo 7 en (1974.11, 5149.68)
@@ -12,8 +12,8 @@ Se encontraron 2 fuentes:
 
 
 2. Longitud de las tuberías
-La red tiene una longitud total de 56154.22 unidades.
-Longitud promedio: 968.18, mínima: 240.62, máxima: 2284.79
+La red tiene una longitud total de 57580.50 unidades.
+Longitud promedio: 959.68, mínima: 240.62, máxima: 2284.79
 
 Detalle de aristas:
   1 -> 17: 906.23 unidades, capacidad 43.8
@@ -74,6 +74,8 @@ Detalle de aristas:
   30 -> 35: 700.40 unidades, capacidad 23.4
   35 -> 36: 566.47 unidades, capacidad 35.6
   37 -> 1: 612.00 unidades, capacidad 232.2
+  38 -> 17: 617.15 unidades, capacidad 50.0
+  39 -> 5: 809.13 unidades, capacidad 45.0
 
 
 3. Sectorización
@@ -81,8 +83,8 @@ La red se dividió en 2 sectores.
 Se cerraron 8 tuberías entre sectores.
 
 Distribución de nodos por sector:
-  Sector 7 (fuente 7): 19 nodos - 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 26, 28
-  Sector 37 (fuente 37): 18 nodos - 1, 2, 3, 9, 10, 11, 17, 18, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37
+  Sector 7 (fuente 7): 20 nodos - 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 26, 28, 39
+  Sector 37 (fuente 37): 19 nodos - 1, 2, 3, 9, 10, 11, 17, 18, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38
 
 Tuberías cerradas:
   11 - 26
@@ -138,6 +140,7 @@ Sector de la fuente 7:
     Tubería 22 - 23: uso 9.00 / capacidad 17.00
     Tubería 24 - 23: uso 9.00 / capacidad 33.60
     Tubería 23 - 25: uso 0.00 / capacidad 54.40
+    Tubería 39 - 5: uso 0.00 / capacidad 45.00
 
 Sector de la fuente 37:
   El nodo más lejano es el 29.
@@ -167,11 +170,14 @@ Sector de la fuente 37:
     Tubería 30 - 35: uso 0.00 / capacidad 23.40
     Tubería 35 - 36: uso 0.00 / capacidad 35.60
     Tubería 37 - 1: uso 52.60 / capacidad 232.20
+    Tubería 38 - 17: uso 0.00 / capacidad 50.00
 
 
 6. Muestra de calidad de agua
 Ruta de muestreo iniciando y terminando en la oficina (nodo 4):
   4 -> 5: 1432.86 unidades
+  5 -> 39: 809.13 unidades
+  39 -> 5: 809.13 unidades
   5 -> 13: 528.72 unidades
   13 -> 14: 762.00 unidades
   14 -> 20: 261.58 unidades
@@ -195,6 +201,8 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 4):
   1 -> 37: 612.00 unidades
   37 -> 1: 612.00 unidades
   1 -> 17: 906.23 unidades
+  17 -> 38: 617.15 unidades
+  38 -> 17: 617.15 unidades
   17 -> 2: 1796.34 unidades
   2 -> 3: 817.15 unidades
   3 -> 2: 817.15 unidades
@@ -212,10 +220,5 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 4):
   11 -> 19: 1107.26 unidades
   19 -> 12: 666.69 unidades
   12 -> 4: 365.17 unidades
-Distancia total del recorrido: 30424.31 unidades
-
-7. Expansión de la red
-Se agregaran 2 nuevas aristas:
-  Nueva arista 38 - 17: longitud 617.15 unidades, capacidad 50.00
-  Nueva arista 39 - 5: longitud 809.13 unidades, capacidad 45.00
+Distancia total del recorrido: 33276.88 unidades
 

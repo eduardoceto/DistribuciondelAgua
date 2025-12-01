@@ -1,10 +1,10 @@
 Resultados para la instancia NYT
-Estado: antes de agregar nodos nuevos
+Estado: despues de agregar nodos nuevos
 
 1. Información básica
-La red tiene 20 nodos y 21 aristas.
+La red tiene 23 nodos y 24 aristas.
 La oficina se encuentra en el nodo 5.
-Hay 3 nuevos nodos pendientes de agregar.
+Hay 0 nuevos nodos pendientes de agregar.
 
 Se encontraron 2 fuentes:
   Nodo 17 en (317.00, 505.00)
@@ -12,8 +12,8 @@ Se encontraron 2 fuentes:
 
 
 2. Longitud de las tuberías
-La red tiene una longitud total de 6020.25 unidades.
-Longitud promedio: 286.68, mínima: 182.21, máxima: 480.84
+La red tiene una longitud total de 11954.53 unidades.
+Longitud promedio: 498.11, mínima: 150.01, máxima: 5567.23
 
 Detalle de aristas:
   1 -> 2: 261.20 unidades, capacidad 181.0
@@ -37,6 +37,9 @@ Detalle de aristas:
   11 -> 20: 386.59 unidades, capacidad 63.0
   20 -> 16: 426.41 unidades, capacidad 63.0
   9 -> 16: 480.84 unidades, capacidad 75.0
+  21 -> 13: 150.01 unidades, capacidad 120.0
+  22 -> 18: 5567.23 unidades, capacidad 20.0
+  23 -> 20: 217.04 unidades, capacidad 170.0
 
 
 3. Sectorización
@@ -44,8 +47,8 @@ La red se dividió en 2 sectores.
 Se cerraron 3 tuberías entre sectores.
 
 Distribución de nodos por sector:
-  Sector 17 (fuente 17): 11 nodos - 3, 4, 5, 6, 7, 8, 9, 10, 16, 17, 20
-  Sector 19 (fuente 19): 9 nodos - 1, 2, 11, 12, 13, 14, 15, 18, 19
+  Sector 17 (fuente 17): 12 nodos - 3, 4, 5, 6, 7, 8, 9, 10, 16, 17, 20, 23
+  Sector 19 (fuente 19): 11 nodos - 1, 2, 11, 12, 13, 14, 15, 18, 19, 21, 22
 
 Tuberías cerradas:
   2 - 3
@@ -60,8 +63,8 @@ Sector de la fuente 17:
   Camino: 17 -> 10 -> 9 -> 8 -> 7 -> 6 -> 5 -> 4 -> 3
 
 Sector de la fuente 19:
-  El nodo más lejano es el 2 a 2101.17 unidades.
-  Camino: 19 -> 18 -> 12 -> 13 -> 14 -> 15 -> 1 -> 2
+  El nodo más lejano es el 22 a 5876.87 unidades.
+  Camino: 19 -> 18 -> 22
 
 
 5. Flujo máximo de cada sector
@@ -80,19 +83,22 @@ Sector de la fuente 17:
     Tubería 10 - 17: uso 73.00 / capacidad 73.00
     Tubería 20 - 16: uso 0.00 / capacidad 63.00
     Tubería 9 - 16: uso 0.00 / capacidad 75.00
+    Tubería 23 - 20: uso 0.00 / capacidad 170.00
 
 Sector de la fuente 19:
-  El nodo más lejano es el 2.
-  Flujo máximo desde la fuente hasta el nodo más lejano: 61.00 unidades.
+  El nodo más lejano es el 22.
+  Flujo máximo desde la fuente hasta el nodo más lejano: 20.00 unidades.
   Uso de tuberías:
-    Tubería 1 - 2: uso 61.00 / capacidad 181.00
+    Tubería 1 - 2: uso 0.00 / capacidad 181.00
     Tubería 12 - 11: uso 0.00 / capacidad 207.00
-    Tubería 13 - 12: uso 61.00 / capacidad 205.00
-    Tubería 14 - 13: uso 61.00 / capacidad 205.00
-    Tubería 15 - 14: uso 61.00 / capacidad 205.00
-    Tubería 1 - 15: uso 61.00 / capacidad 207.00
-    Tubería 12 - 18: uso 61.00 / capacidad 75.00
-    Tubería 18 - 19: uso 61.00 / capacidad 61.00
+    Tubería 13 - 12: uso 0.00 / capacidad 205.00
+    Tubería 14 - 13: uso 0.00 / capacidad 205.00
+    Tubería 15 - 14: uso 0.00 / capacidad 205.00
+    Tubería 1 - 15: uso 0.00 / capacidad 207.00
+    Tubería 12 - 18: uso 0.00 / capacidad 75.00
+    Tubería 18 - 19: uso 20.00 / capacidad 61.00
+    Tubería 21 - 13: uso 0.00 / capacidad 120.00
+    Tubería 22 - 18: uso 20.00 / capacidad 20.00
 
 
 6. Muestra de calidad de agua
@@ -104,13 +110,19 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 5):
   1 -> 15: 322.33 unidades
   15 -> 14: 281.11 unidades
   14 -> 13: 351.43 unidades
+  13 -> 21: 150.01 unidades
+  21 -> 13: 150.01 unidades
   13 -> 12: 213.41 unidades
   12 -> 18: 362.02 unidades
+  18 -> 22: 5567.23 unidades
+  22 -> 18: 5567.23 unidades
   18 -> 19: 309.65 unidades
   19 -> 18: 309.65 unidades
   18 -> 12: 362.02 unidades
   12 -> 11: 236.54 unidades
   11 -> 20: 386.59 unidades
+  20 -> 23: 217.04 unidades
+  23 -> 20: 217.04 unidades
   20 -> 16: 426.41 unidades
   16 -> 9: 480.84 unidades
   9 -> 10: 182.21 unidades
@@ -123,11 +135,5 @@ Ruta de muestreo iniciando y terminando en la oficina (nodo 5):
   8 -> 7: 187.95 unidades
   7 -> 6: 187.38 unidades
   6 -> 5: 211.61 unidades
-Distancia total del recorrido: 7622.34 unidades
-
-7. Expansión de la red
-Se agregaran 3 nuevas aristas:
-  Nueva arista 21 - 13: longitud 150.01 unidades, capacidad 120.00
-  Nueva arista 22 - 18: longitud 5567.23 unidades, capacidad 20.00
-  Nueva arista 23 - 20: longitud 217.04 unidades, capacidad 170.00
+Distancia total del recorrido: 19490.91 unidades
 
