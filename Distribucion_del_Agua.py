@@ -822,7 +822,8 @@ def calcular_flujo_maximo(instancia: Instancia) -> Dict:
         return capacity, adj
 
     # Implementación de Edmonds-Karp 
-    def edmonds_karp(capacity: Dict[Tuple[int,int], float], adj: Dict[int, Set[int]], s: int, t: int):
+    def edmonds_karp(capacity: Dict[Tuple[int, int], float], 
+                     adj: Dict[int, Set[int]], s: int, t: int):
         flow = defaultdict(float)  # flujo actual por arista (u,v)
         max_flow = 0.0
 
@@ -883,6 +884,76 @@ def calcular_flujo_maximo(instancia: Instancia) -> Dict:
 
         flujo_max, flujo_por_arista = edmonds_karp(capacity, adj, fuente_id, sink)
 
+        # Encontrar el camino del flujo máximo usando BFS desde la fuente hasta el sink
+        # usando solo aristas con flujo positivo significativo
+        camino_flujo = []
+        if flujo_max > 1e-9:
+            # Construir grafo de flujo (solo aristas con flujo > 0)
+            # Usar un umbral para considerar solo aristas con flujo significativo
+            umbral_flujo = flujo_max * 0.1  # al menos 10% del flujo máximo
+            grafo_flujo = defaultdict(list)
+            flujos_aristas = {}
+            for (u, v), flujo in flujo_por_arista.items():
+                if flujo > umbral_flujo:
+                    grafo_flujo[u].append(v)
+                    flujos_aristas[(u, v)] = flujo
+            
+            # BFS para encontrar camino desde fuente hasta sink
+            # priorizando aristas con mayor flujo
+            parent = {}
+            q = deque([fuente_id])
+            parent[fuente_id] = None
+            
+            while q and sink not in parent:
+                u = q.popleft()
+                # Ordenar vecinos por flujo descendente para priorizar caminos con mayor flujo
+                vecinos = sorted(grafo_flujo.get(u, []), 
+                               key=lambda v: flujos_aristas.get((u, v), 0.0), 
+                               reverse=True)
+                for v in vecinos:
+                    if v not in parent:
+                        parent[v] = u
+                        q.append(v)
+                        if v == sink:
+                            break
+            
+            # Reconstruir camino
+            if sink in parent:
+                camino_flujo = []
+                nodo = sink
+                while nodo is not None:
+                    camino_flujo.append(nodo)
+                    nodo = parent.get(nodo)
+                camino_flujo.reverse()
+            
+            # Si no se encontró camino con el umbral, intentar con cualquier flujo > 0
+            if not camino_flujo:
+                grafo_flujo = defaultdict(list)
+                for (u, v), flujo in flujo_por_arista.items():
+                    if flujo > 1e-9:
+                        grafo_flujo[u].append(v)
+                
+                parent = {}
+                q = deque([fuente_id])
+                parent[fuente_id] = None
+                
+                while q and sink not in parent:
+                    u = q.popleft()
+                    for v in grafo_flujo.get(u, []):
+                        if v not in parent:
+                            parent[v] = u
+                            q.append(v)
+                            if v == sink:
+                                break
+                
+                if sink in parent:
+                    camino_flujo = []
+                    nodo = sink
+                    while nodo is not None:
+                        camino_flujo.append(nodo)
+                        nodo = parent.get(nodo)
+                    camino_flujo.reverse()
+
         uso_tuberias = []
         # Reportar uso neto por arista (undirected): tomar flow[(u,v)]
         for ar in instancia.aristas:
@@ -905,7 +976,8 @@ def calcular_flujo_maximo(instancia: Instancia) -> Dict:
             'fuente': fuente_id,
             'nodo_mas_lejano': sink,
             'flujo_maximo': flujo_max,
-            'uso_tuberias': uso_tuberias
+            'uso_tuberias': uso_tuberias,
+            'camino': camino_flujo
         }
 
     return resultados
@@ -946,6 +1018,7 @@ def graficar_flujo_maximo_agua(instancia: Instancia, ruta_salida: str = None,
                color='black', linewidth=1, linestyle='--',
                alpha=0.2, zorder=1)
     
+    # Primero dibujar todas las tuberías con flujo (fondo)
     for fuente_id, info in flujo_maximo.items():
         color = fuente_a_color.get(fuente_id, 'gray')
 
@@ -957,13 +1030,38 @@ def graficar_flujo_maximo_agua(instancia: Instancia, ruta_salida: str = None,
             ratio = (uso / capacidad) if capacidad > 0 else 0.0
             ancho_linea = max(0.8, min(8.0, 6 * ratio))
             ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
-                   color=color, linewidth=ancho_linea, alpha=0.8, zorder=2)
+                   color=color, linewidth=ancho_linea, alpha=0.5, zorder=2)
             mid_x = (nodo1.x + nodo2.x) / 2.0
             mid_y = (nodo1.y + nodo2.y) / 2.0
             etiqueta = f"{uso:.1f}/{capacidad:.1f}"
             ax.text(mid_x, mid_y, etiqueta, fontsize=7, ha='center', va='center',
                     bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.8),
                     zorder=4)
+    
+    # Luego dibujar el camino del flujo máximo destacado
+    for fuente_id, info in flujo_maximo.items():
+        color = fuente_a_color.get(fuente_id, 'gray')
+        camino = info.get('camino', [])
+        flujo_max = info.get('flujo_maximo', 0.0)
+        
+        if camino and len(camino) > 1:
+            # Dibujar el camino del flujo máximo con línea más gruesa
+            for i in range(len(camino) - 1):
+                nodo1 = instancia.nodos[camino[i]]
+                nodo2 = instancia.nodos[camino[i + 1]]
+                ax.plot([nodo1.x, nodo2.x], [nodo1.y, nodo2.y],
+                       color=color, linewidth=6, alpha=0.9, zorder=3)
+            
+            # Etiqueta con el flujo máximo al final del camino
+            if camino:
+                nodo_fin = instancia.nodos[camino[-1]]
+                ax.text(nodo_fin.x, nodo_fin.y + 100, 
+                       f"Flujo: {flujo_max:.1f}",
+                       fontsize=10, ha='center', va='bottom',
+                       bbox=dict(boxstyle='round,pad=0.5', 
+                                facecolor=color, alpha=0.8,
+                                edgecolor='black', linewidth=2),
+                       weight='bold', zorder=8)
             
 
     for id_nodo, nodo in instancia.nodos.items():
